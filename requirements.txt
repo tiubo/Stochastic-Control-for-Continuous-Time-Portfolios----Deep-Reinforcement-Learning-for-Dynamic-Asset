@@ -23,6 +23,10 @@ stable-baselines3>=2.0.0
 torch>=2.0.0
 tensorboard>=2.14.0
 
+# Hyperparameter Optimization
+optuna>=3.4.0
+cloudpickle>=3.0.0
+
 # API & Web
 fastapi>=0.104.0
 uvicorn>=0.24.0

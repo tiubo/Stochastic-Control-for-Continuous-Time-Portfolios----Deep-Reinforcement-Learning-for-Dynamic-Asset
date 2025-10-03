@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nchore: initialize project with gitignore and MIT license\n\n- Add comprehensive Python gitignore\n- Add MIT License with proper attribution\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\ndocs: add comprehensive project implementation plan\n\n- Complete technical architecture overview\n- Phase-by-phase implementation roadmap (25 days)\n- Module specifications for all components\n- Success criteria checklist\n- 15+ visualization requirements\n- Detailed MDP formulation\n- Academic and technical references\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nchore: add project dependencies and setup configuration\n\n- Add requirements.txt with all necessary packages\n  - Core: numpy, pandas, scipy\n  - ML/RL: scikit-learn, gym, stable-baselines3, torch\n  - Data: yfinance, fredapi\n  - API: fastapi, streamlit\n  - Testing: pytest, mypy\n\n- Add setup.py for package installation\n  - Project metadata and classifiers\n  - Development extras\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: implement data pipeline for market data acquisition\n\nAdd comprehensive data pipeline with three modules:\n\n1. download.py - DataDownloader class\n   - Yahoo Finance integration for assets (SPY, TLT, GLD, BTC)\n   - VIX volatility index download\n   - FRED API for treasury rates (with mock fallback)\n   - Batch download functionality\n\n2. preprocessing.py - DataPreprocessor class\n   - Return calculations (log/simple)\n   - Rolling volatility computation\n   - Data alignment across multiple sources\n   - Missing value handling\n   - Lagged feature generation\n   - Complete dataset preparation\n\n3. features.py - FeatureEngineer class\n   - Technical indicators: RSI, MACD, Bollinger Bands\n   - Momentum signals (10-day, 30-day)\n   - Moving averages (20-day, 50-day, 200-day)\n   - Rolling Sharpe ratio\n   - Drawdown metrics\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "Bash(gh:*)",
+      "Bash(git push:*)",
+      "Bash(tree:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(dir:*)",
+      "Bash(git rev-list:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
