@@ -133,9 +133,17 @@ class PortfolioEnv(gym.Env):
             volatility.append(vol)
         state_components.append(np.array(volatility))
 
-        # Market regime (if available)
+        # Market regime (if available - check both possible names)
+        regime_col = None
         if 'regime' in self.data.columns:
-            regime = self.data['regime'].iloc[idx]
+            regime_col = 'regime'
+        elif 'regime_gmm' in self.data.columns:
+            regime_col = 'regime_gmm'
+        elif 'regime_hmm' in self.data.columns:
+            regime_col = 'regime_hmm'
+
+        if regime_col:
+            regime = self.data[regime_col].iloc[idx]
             # One-hot encode regime (assuming 3 regimes)
             regime_one_hot = np.zeros(3)
             if not np.isnan(regime):

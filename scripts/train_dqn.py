@@ -16,7 +16,7 @@ from tqdm import tqdm
 
 
 def train_dqn(
-    data_path: str = "data/processed/complete_dataset.csv",
+    data_path: str = "data/processed/dataset_with_regimes.csv",
     n_episodes: int = 1000,
     save_path: str = "models/dqn_agent.pth",
     device: str = "cpu"
@@ -156,7 +156,7 @@ def train_dqn(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train DQN agent")
-    parser.add_argument("--data", type=str, default="data/processed/complete_dataset.csv",
+    parser.add_argument("--data", type=str, default="data/processed/dataset_with_regimes.csv",
                         help="Path to processed dataset")
     parser.add_argument("--episodes", type=int, default=1000,
                         help="Number of training episodes")
