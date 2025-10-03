@@ -95,17 +95,33 @@ cd deep-rl-portfolio-allocation
 pip install -r requirements.txt
 ```
 
-### Download Data
+### Quick Demo (Complete Pipeline)
 
 ```bash
+# 1. Download market data
 python src/data_pipeline/download.py
+
+# 2. Preprocess data
+python scripts/simple_preprocess.py
+
+# 3. Train regime detection models
+python scripts/train_regime_models.py
+
+# 4. Generate visualizations
+python scripts/generate_visualizations.py
+
+# 5. Launch interactive dashboard
+streamlit run app/dashboard.py
 ```
 
-This downloads:
+### Data Downloads
+
+The pipeline automatically downloads:
 - **Asset prices**: SPY (S&P 500), TLT (Bonds), GLD (Gold), BTC-USD (Bitcoin)
 - **VIX**: Volatility index
 - **Treasury rates**: 10-year yields
 - **Date range**: 2010-2025 (15 years)
+- **Final dataset**: 2,570 observations (2014-2024)
 
 ### Train Regime Detection Models
 
@@ -358,6 +374,74 @@ curl -X POST http://localhost:8000/predict \
   -d '{"state": [...], "model": "dqn"}'
 ```
 
+### Docker Deployment (Recommended)
+
+```bash
+# Build and run with docker-compose
+docker-compose up -d
+
+# Access services:
+# - API: http://localhost:8000
+# - Dashboard: http://localhost:8501
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+---
+
+## 📊 Generated Visualizations
+
+The project includes a comprehensive visualization module that generates:
+
+### Exploratory Data Analysis (3 plots)
+- **Asset Price Trajectories** - 15-year historical prices for all assets
+- **Return Correlation Matrix** - Asset return correlations heatmap
+- **Volatility Time Series** - Asset volatility with VIX overlay
+
+### Market Regime Analysis (3 plots)
+- **SPY Regime Colored (GMM)** - Prices colored by Bull/Bear/Volatile regimes
+- **SPY Regime Colored (HMM)** - Hidden Markov Model regime classification
+- **Regime Statistics** - Bar charts showing regime frequency, returns, volatility
+
+### Performance Comparison (3 plots)
+- **Wealth Trajectories** - Portfolio value over time (DQN vs Merton vs Buy-Hold)
+- **Drawdown Comparison** - Maximum drawdown analysis
+- **Risk-Return Scatter** - Volatility vs returns for all strategies
+
+**Generate all plots:**
+```bash
+python scripts/generate_visualizations.py
+```
+
+All visualizations are saved to `docs/figures/` with subdirectories for organization.
+
+---
+
+## 🎨 Interactive Dashboard
+
+Launch the **Streamlit dashboard** for interactive analysis:
+
+```bash
+streamlit run app/dashboard.py
+```
+
+**Features:**
+- 📊 Real-time data exploration with date range filtering
+- 🎯 Market regime analysis with GMM/HMM visualization
+- 📈 Asset performance metrics and correlation analysis
+- 🔄 Interactive plotly charts
+- ℹ️ Project documentation and methodology
+
+**Dashboard Preview:**
+- **Overview Tab**: Dataset summary, price trajectories, return distributions
+- **Regime Analysis Tab**: Regime distribution, regime-colored prices, statistics
+- **Asset Performance Tab**: Correlation matrix, performance metrics table
+- **About Tab**: Project methodology, technical stack, references
+
 ---
 
 ## 🧪 Testing
@@ -388,20 +472,30 @@ pytest tests/ --cov=src --cov-report=html
 
 ## 🛣️ Roadmap
 
+### ✅ Completed
 - [x] Project planning and structure
-- [x] Data pipeline and preprocessing
-- [x] Market regime detection (GMM/HMM)
+- [x] Data pipeline and preprocessing (2,570 observations)
+- [x] Market regime detection (GMM/HMM trained)
 - [x] Portfolio Gymnasium environment
 - [x] DQN agent implementation
 - [x] Merton baseline strategy
-- [ ] PPO agent implementation
+- [x] **Visualization module (9 plots generated)**
+- [x] **Streamlit interactive dashboard**
+- [x] **FastAPI deployment endpoint**
+- [x] **Docker containerization**
+- [x] **Training scripts and infrastructure**
+
+### 🔄 In Progress
+- [ ] Full DQN training (1000 episodes)
 - [ ] Comprehensive backtesting framework
-- [ ] Training all agents on historical data
-- [ ] Visualization generation
-- [ ] Streamlit dashboard
-- [ ] FastAPI deployment
-- [ ] Docker containerization
-- [ ] Final performance analysis and report
+- [ ] Real performance comparison vs baselines
+
+### 📋 Future Work
+- [ ] PPO agent implementation
+- [ ] Crisis period stress testing
+- [ ] Advanced visualization & reporting
+- [ ] Cloud deployment (AWS/GCP)
+- [ ] Real-time data streaming
 
 ---
 
