@@ -11,24 +11,38 @@
 
 > **Modern Evolution of Merton's Portfolio Theory**: Combining Deep Reinforcement Learning with Market Regime Detection for Adaptive Asset Allocation
 
-## 🎮 **Live Interactive Demo**
+## 🎮 **Live Interactive Demos**
 
 <div align="center">
 
-### 📊 **[Launch Interactive Dashboard](https://deep-rl-portfolio.streamlit.app)** 📊
+### 🤖 **[NEW: Agentic Portfolio Manager](https://stochastic-control-agentic.streamlit.app)** 🤖
+
+*Multi-Agent System for Volatility-Aware Portfolio Management*
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://stochastic-control-agentic.streamlit.app)
+
+**Agentic Features:**
+- 🔍 **Volatility Detection Agent** - Real-time regime classification (6 volatility levels)
+- ⚠️ **Risk Management Agent** - VaR, CVaR, drawdown monitoring
+- 📊 **Regime Detection Agent** - Bull/Bear/Crisis identification
+- ⚖️ **Adaptive Rebalancing Agent** - Dynamic timing & thresholds
+- 📈 **Volatility Forecasting Agent** - GARCH-inspired predictions
+- 🎛️ **Agent Coordinator** - Unified decision-making
+
+[📖 Read Agentic System Documentation](docs/AGENTIC_SYSTEM.md)
+
+---
+
+### 📊 **[Classic RL Dashboard](https://stochastic-control-for-continuous-time-portfolios.streamlit.app)** 📊
 
 *Experience real-time portfolio allocation with Deep RL agents*
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://deep-rl-portfolio.streamlit.app)
-
-**Features:**
+**Classic Features:**
 - 📈 Live Portfolio Performance Visualization
 - 🎯 Strategy Comparison (5 Baselines + 3 RL Agents)
 - 📊 Dynamic Asset Allocation Charts
 - 📉 Real-Time Risk Analysis & Drawdowns
 - 🤖 RL Training Progress Dashboard
-
-![Dashboard Preview](docs/images/dashboard_preview.png)
 
 </div>
 
