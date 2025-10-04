@@ -1,0 +1,61 @@
+# Main configuration file for portfolio allocation project
+# Using Hydra for configuration management
+
+defaults:
+  - agent: sac
+  - environment: portfolio
+  - training: default
+  - _self_
+
+# Project metadata
+project:
+  name: "Deep RL Portfolio Allocation"
+  version: "1.0.0"
+  description: "Multi-agent RL system for dynamic asset allocation"
+
+# Data configuration
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  dataset_path: "data/processed/dataset.csv"
+
+  # Asset tickers
+  assets:
+    - SPY  # S&P 500 ETF
+    - TLT  # 20+ Year Treasury Bond ETF
+    - GLD  # Gold ETF
+    - BTC-USD  # Bitcoin
+
+  # Date range
+  start_date: "2010-01-01"
+  end_date: "2024-12-31"
+
+  # Train/test split
+  train_ratio: 0.8
+  validation_ratio: 0.1
+
+# Model storage
+models:
+  save_dir: "models"
+  checkpoint_freq: 10000
+  keep_n_checkpoints: 5
+
+# Results and logging
+output:
+  results_dir: "results"
+  logs_dir: "logs"
+  plots_dir: "results/plots"
+  tensorboard_dir: "runs"
+
+# Experiment tracking
+experiment:
+  track: true
+  platform: "mlflow"  # Options: mlflow, wandb, tensorboard
+  experiment_name: "portfolio_allocation"
+  run_name: null  # Auto-generated if null
+
+# Random seed for reproducibility
+seed: 42
+
+# Device configuration
+device: "auto"  # Options: auto, cpu, cuda
