@@ -70,7 +70,7 @@ def evaluate_dqn_agent(model_path, data_path, device='cpu'):
     print(f"State dim: {state_dim}, Action dim: {action_dim}")
 
     # Run episode with no exploration
-    state = test_env.reset()
+    state, _ = test_env.reset()  # Gymnasium API returns (state, info)
     done = False
 
     initial_value = 100000  # Match baseline initial capital
@@ -87,8 +87,13 @@ def evaluate_dqn_agent(model_path, data_path, device='cpu'):
         action = agent.select_action(state, epsilon=0.0)
         actions_list.append(action)
 
-        # Take step
-        next_state, reward, done, info = test_env.step(action)
+        # Take step (handle both old and new Gymnasium API)
+        step_result = test_env.step(action)
+        if len(step_result) == 5:
+            next_state, reward, terminated, truncated, info = step_result
+            done = terminated or truncated
+        else:
+            next_state, reward, done, info = step_result
 
         # Get portfolio return from environment
         portfolio_return = info.get('portfolio_return', 0.0)
@@ -177,7 +182,7 @@ def create_comparison_report(dqn_metrics, baseline_df, output_dir='simulations/b
     # Save updated comparison
     comparison_path = output_path / 'dqn_vs_baselines_comparison.csv'
     comparison_df.to_csv(comparison_path)
-    print(f"\n✓ Saved comparison to {comparison_path}")
+    print(f"\n[OK] Saved comparison to {comparison_path}")
 
     # Display comparison table
     print("\n" + "="*80)
@@ -239,7 +244,7 @@ def create_comparison_report(dqn_metrics, baseline_df, output_dir='simulations/b
     plt.tight_layout()
     plot_path = output_path / 'dqn_vs_baselines.png'
     plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-    print(f"✓ Saved visualization to {plot_path}")
+    print(f"[OK] Saved visualization to {plot_path}")
     plt.close()
 
     # Calculate rankings
@@ -263,7 +268,7 @@ def create_comparison_report(dqn_metrics, baseline_df, output_dir='simulations/b
     if 'DQN' in rankings_df.index:
         dqn_rank = rankings_df.loc['DQN', 'Average Rank']
         total_strategies = len(rankings_df)
-        print(f"\n🎯 DQN Agent: Ranked #{int(dqn_rank)} out of {total_strategies} strategies")
+        print(f"\n[TARGET] DQN Agent: Ranked #{int(dqn_rank)} out of {total_strategies} strategies")
 
     return comparison_df
 
@@ -309,7 +314,7 @@ def main():
     print("ANALYSIS COMPLETE!")
     print("="*80)
     print(f"\nResults saved to: {args.output}")
-    print(f"\n✓ Backtesting and comparison complete!")
+    print(f"\n[OK] Backtesting and comparison complete!")
 
 
 if __name__ == '__main__':
