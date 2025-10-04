@@ -287,15 +287,36 @@ def plot_training_curves(episode_rewards, eval_returns, losses_history, eval_fre
 
 
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Train SAC agent for portfolio allocation')
+    parser.add_argument('--data-path', type=str, default='data/processed/dataset_with_regimes.csv',
+                        help='Path to processed dataset')
+    parser.add_argument('--total-timesteps', type=int, default=200000,
+                        help='Total training timesteps')
+    parser.add_argument('--eval-freq', type=int, default=10000,
+                        help='Evaluation frequency')
+    parser.add_argument('--save-freq', type=int, default=20000,
+                        help='Model save frequency')
+    parser.add_argument('--model-save-path', type=str, default='models/sac_trained.pth',
+                        help='Path to save model')
+    parser.add_argument('--device', type=str, default='cpu',
+                        help='Device (cpu or cuda)')
+
+    args = parser.parse_args()
+
     # Create directories
     os.makedirs('models', exist_ok=True)
     os.makedirs('results', exist_ok=True)
 
     # Train agent
     agent, episode_rewards, eval_returns = train_sac(
-        total_timesteps=200000,
-        eval_freq=5000,
-        save_freq=10000
+        data_path=args.data_path,
+        total_timesteps=args.total_timesteps,
+        eval_freq=args.eval_freq,
+        save_freq=args.save_freq,
+        model_save_path=args.model_save_path,
+        device=args.device
     )
 
     print("\nTraining complete!")
