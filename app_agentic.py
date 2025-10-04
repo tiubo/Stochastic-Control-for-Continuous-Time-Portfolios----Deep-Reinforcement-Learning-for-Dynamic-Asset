@@ -29,48 +29,154 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Enhanced Custom CSS with Modern UI
 st.markdown("""
 <style>
+    /* Main theme */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    /* Headers with animations */
     .main-header {
-        font-size: 3rem;
-        font-weight: bold;
+        font-size: 3.5rem;
+        font-weight: 900;
         text-align: center;
-        background: linear-gradient(90deg, #1f77b4, #ff7f0e);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 0;
+        margin-bottom: 0.5rem;
+        animation: fadeInDown 1s ease-in;
     }
+
     .sub-header {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         text-align: center;
-        color: #666;
+        color: #555;
         margin-top: 0;
+        margin-bottom: 2rem;
+        animation: fadeIn 1.5s ease-in;
     }
+
+    /* Enhanced alert banners with gradients and animations */
     .alert-red {
-        background-color: #ffebee;
-        border-left: 5px solid #f44336;
-        padding: 15px;
-        border-radius: 5px;
-    }
-    .alert-yellow {
-        background-color: #fff3e0;
-        border-left: 5px solid #ff9800;
-        padding: 15px;
-        border-radius: 5px;
-    }
-    .alert-green {
-        background-color: #e8f5e9;
-        border-left: 5px solid #4caf50;
-        padding: 15px;
-        border-radius: 5px;
-    }
-    .agent-card {
-        background-color: #f5f5f5;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+        border-left: 5px solid #c92a2a;
         padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        animation: pulse 2s infinite;
+    }
+
+    .alert-yellow {
+        background: linear-gradient(135deg, #ffd93d 0%, #ffb700 100%);
+        color: #333;
+        border-left: 5px solid #f59f00;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .alert-green {
+        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        color: white;
+        border-left: 5px solid #2f9e44;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    /* Agent cards with hover effects */
+    .agent-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        padding: 25px;
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        margin: 15px 0;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .agent-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        border-color: #667eea;
+    }
+
+    .agent-card h4 {
+        color: #667eea;
+        font-weight: 700;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+
+    /* Enhanced buttons */
+    .stButton>button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Enhanced tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px 8px 0 0;
+        padding: 10px 20px;
+        font-weight: 600;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    /* Metric cards */
+    div[data-testid="metric-container"] {
+        background: white;
+        padding: 15px;
         border-radius: 10px;
-        border: 2px solid #1f77b4;
-        margin: 10px 0;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    div[data-testid="metric-container"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 12px rgba(0,0,0,0.15);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -242,9 +348,34 @@ with tab1:
             <h4>🔍 Volatility Detection Agent</h4>
         </div>
         """, unsafe_allow_html=True)
-        st.metric("Current Regime", vol_signal.regime.name)
+        st.metric("Current Regime", vol_signal.regime.name.replace('_', ' '))
         st.metric("Confidence", f"{vol_signal.confidence*100:.1f}%")
         st.metric("Alert Level", alert_level.upper())
+
+        # Add volatility gauge
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=vol_signal.current_vol,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            title={'text': "Current Vol %", 'font': {'size': 14}},
+            gauge={
+                'axis': {'range': [None, 50], 'tickwidth': 1},
+                'bar': {'color': "#667eea"},
+                'steps': [
+                    {'range': [0, 12], 'color': "rgba(81, 207, 102, 0.3)"},
+                    {'range': [12, 20], 'color': "rgba(255, 217, 61, 0.3)"},
+                    {'range': [20, 30], 'color': "rgba(255, 183, 0, 0.3)"},
+                    {'range': [30, 50], 'color': "rgba(255, 107, 107, 0.3)"}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 3},
+                    'thickness': 0.75,
+                    'value': 30
+                }
+            }
+        ))
+        fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
+        st.plotly_chart(fig_gauge, use_container_width=True, key="vol_gauge")
 
     with col2:
         st.markdown("""
