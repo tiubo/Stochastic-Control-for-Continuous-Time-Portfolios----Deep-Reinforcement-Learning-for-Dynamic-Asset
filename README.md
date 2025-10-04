@@ -12,15 +12,25 @@
 
 ## 🚀 Quick Start
 
-### Deploy API with Docker
+### Deploy API (Python-Based)
 
 ```bash
 # Clone repository
 git clone https://github.com/mohin-io/Stochastic-Control-for-Continuous-Time-Portfolios--Deep-Reinforcement-Learning-for-Dynamic-Asset.git
 cd "Stochastic Control for Continuous - Time Portfolios"
 
-# Run with Docker
-docker-compose up -d
+# Install dependencies
+pip install -r requirements.txt
+
+# Deploy with Python script (replaces docker-compose)
+python deploy.py --service all
+
+# Or deploy individual services
+python deploy.py --service api        # API only
+python deploy.py --service dashboard  # Dashboard only
+
+# With Docker (optional)
+python deploy.py --service api --docker
 
 # Test API
 curl http://localhost:8000/metrics
@@ -192,7 +202,7 @@ Against 5 classical baselines:
 ### Enhanced Visualizations
 - **Rolling Metrics**: [simulations/enhanced_viz/rolling_metrics.png](simulations/enhanced_viz/rolling_metrics.png)
 - **Allocation Heatmap**: [simulations/enhanced_viz/allocation_heatmap.png](simulations/enhanced_viz/allocation_heatmap.png)
-- **Interactive Dashboard**: [simulations/enhanced_viz/interactive_dashboard.html](simulations/enhanced_viz/interactive_dashboard.html)
+- **Interactive Dashboard**: Run `python deploy.py --service dashboard` or `streamlit run app/dashboard.py`
 - **Regime Analysis**: [simulations/enhanced_viz/regime_analysis.png](simulations/enhanced_viz/regime_analysis.png)
 
 ### Crisis Stress Tests
@@ -282,15 +292,19 @@ python scripts/train_ppo.py \
 
 ## 🌐 API Deployment
 
-### Local Deployment
+### Local Deployment (Python-Based)
 
 ```bash
-# Option 1: Docker (Recommended)
-docker-compose up -d
+# Option 1: Python deployment script (Recommended)
+python deploy.py --service all  # Deploys both API and dashboard
 
-# Option 2: Python
+# Option 2: Docker (via Python script)
+python deploy.py --service api --docker
+
+# Option 3: Manual deployment
 pip install fastapi uvicorn
-uvicorn api.main:app --reload
+cd src/deployment
+uvicorn api:app --host 0.0.0.0 --port 8000
 ```
 
 ### Cloud Deployment
@@ -303,12 +317,16 @@ aws ec2 run-instances --image-id ami-xxx --instance-type t3.xlarge
 # Deploy
 ssh -i key.pem ubuntu@<ip>
 git clone <repo-url>
-docker-compose up -d
+pip install -r requirements.txt
+python deploy.py --service all
 ```
 
 **GCP Cloud Run:**
 ```bash
-gcloud builds submit --tag gcr.io/<project>/portfolio-api
+# Build with Python deployment script
+python deploy.py --service api --docker
+docker tag portfolio-api gcr.io/<project>/portfolio-api
+docker push gcr.io/<project>/portfolio-api
 gcloud run deploy --image gcr.io/<project>/portfolio-api
 ```
 
