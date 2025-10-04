@@ -517,26 +517,60 @@ All visualizations are saved to `docs/figures/` with subdirectories for organiza
 
 ---
 
-## 🎨 Interactive Dashboard
+## 🎨 Interactive Dashboards
 
-Launch the **Streamlit dashboard** for interactive analysis:
+**Three comprehensive interactive dashboards** for real-time analysis and monitoring:
 
+### 1. **Analytics Dashboard** (Recommended) 📊
 ```bash
-streamlit run app/dashboard.py
+streamlit run app/analytics_dashboard.py
 ```
 
-**Features:**
-- 📊 Real-time data exploration with date range filtering
-- 🎯 Market regime analysis with GMM/HMM visualization
-- 📈 Asset performance metrics and correlation analysis
-- 🔄 Interactive plotly charts
-- ℹ️ Project documentation and methodology
+**5 Interactive Tabs:**
+- **Portfolio Overview:** Asset prices, returns distribution, key metrics
+- **Regime Analysis:** GMM/HMM visualization, performance by regime
+- **Risk Analytics:** VaR, CVaR, drawdown, rolling volatility
+- **Strategy Comparison:** Multi-strategy performance analysis
+- **Training Monitor:** Real-time training progress
 
-**Dashboard Preview:**
-- **Overview Tab**: Dataset summary, price trajectories, return distributions
-- **Regime Analysis Tab**: Regime distribution, regime-colored prices, statistics
-- **Asset Performance Tab**: Correlation matrix, performance metrics table
-- **About Tab**: Project methodology, technical stack, references
+**Features:**
+- Interactive Plotly charts (zoom, pan, hover tooltips)
+- Date range filtering
+- Theme selection (4 themes: dark, light, seaborn, ggplot2)
+- Real-time metric calculation
+- Export functionality (CSV, JSON, HTML)
+
+---
+
+### 2. **Training Monitor** 🎓
+```bash
+streamlit run app/training_monitor_dashboard.py
+```
+
+**Real-Time Training Monitoring:**
+- Auto-refresh (5-second intervals)
+- Episode reward curves (raw + MA-10, MA-50, MA-100)
+- Training speed (episodes/hour)
+- Trend analysis (improving vs declining)
+- Convergence estimation
+
+**Export Options:**
+- Download training stats (CSV)
+- Download summary report (JSON)
+
+---
+
+### 3. **Enhanced Dashboard** (Original) ✅
+```bash
+streamlit run app/enhanced_dashboard.py
+```
+
+**Production-Ready Dashboard:**
+- 16/16 tests passing (100% coverage)
+- 5 tabs: Overview, Regime, Performance, Technical, About
+- Robust error handling and validation
+
+**See:** [DASHBOARD_GUIDE.md](docs/DASHBOARD_GUIDE.md) for complete documentation
 
 ---
 
