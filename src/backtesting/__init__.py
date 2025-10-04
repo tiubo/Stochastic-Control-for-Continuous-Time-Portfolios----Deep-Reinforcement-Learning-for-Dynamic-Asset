@@ -6,7 +6,7 @@ Comprehensive backtesting engine for portfolio strategies:
 - BacktestConfig: Configuration dataclass
 - BacktestResults: Results container
 - Strategy: Abstract base class for strategies
-- Strategy Adapters: Connect baseline strategies to engine
+- Strategy Adapters: Connect baseline and RL strategies to engine
 """
 
 from .backtest_engine import (
@@ -26,6 +26,13 @@ from .strategy_adapters import (
     create_strategy_adapter
 )
 
+from .rl_strategy_adapters import (
+    DQNStrategyAdapter,
+    PPOStrategyAdapter,
+    SACStrategyAdapter,
+    create_rl_strategy_adapter
+)
+
 __all__ = [
     # Core engine
     'BacktestEngine',
@@ -34,11 +41,17 @@ __all__ = [
     'Strategy',
     'TradeRecord',
 
-    # Adapters
+    # Baseline adapters
     'MertonStrategyAdapter',
     'MeanVarianceAdapter',
     'EqualWeightAdapter',
     'BuyAndHoldAdapter',
     'RiskParityAdapter',
-    'create_strategy_adapter'
+    'create_strategy_adapter',
+
+    # RL adapters
+    'DQNStrategyAdapter',
+    'PPOStrategyAdapter',
+    'SACStrategyAdapter',
+    'create_rl_strategy_adapter'
 ]

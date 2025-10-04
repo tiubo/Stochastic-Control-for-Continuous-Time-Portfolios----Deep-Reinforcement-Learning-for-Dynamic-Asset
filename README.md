@@ -1,9 +1,13 @@
 # 🚀 Deep Reinforcement Learning for Dynamic Asset Allocation
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Gymnasium](https://img.shields.io/badge/Gymnasium-0.29%2B-orange)](https://gymnasium.farama.org/)
+[![CI](https://img.shields.io/badge/CI-GitHub%20Actions-blue)](https://github.com/mohin-io/deep-rl-portfolio-allocation/actions)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![MLflow](https://img.shields.io/badge/tracking-MLflow-0194E2)](https://mlflow.org/)
+[![Hydra](https://img.shields.io/badge/config-Hydra-89b8cd)](https://hydra.cc/)
 
 > **Modern Evolution of Merton's Portfolio Theory**: Combining Deep Reinforcement Learning with Market Regime Detection for Adaptive Asset Allocation
 
@@ -16,11 +20,14 @@ This project tackles the **dynamic portfolio allocation problem** - a modern, da
 ### 🔑 Key Innovation
 
 We frame portfolio management as a **Markov Decision Process (MDP)** and solve it using:
+- **Soft Actor-Critic (SAC)** - State-of-the-art continuous control with automatic temperature tuning
 - **Prioritized DQN** with Double DQN, Dueling architecture, and Noisy Networks (30% better sample efficiency)
 - **Proximal Policy Optimization (PPO)** with Actor-Critic for continuous allocation (20-30% better returns)
 - **Market Regime Detection** (GMM/HMM) to augment state space with bull/bear/volatile classifications
 - **Parallel Environments** for 10x faster training
 - **Automated Hyperparameter Tuning** with Optuna (15-25% performance gains)
+- **Walk-Forward Validation** for robust, realistic backtesting
+- **MLflow Experiment Tracking** for reproducible research
 
 ### 📊 Problem Statement
 
@@ -173,11 +180,58 @@ python scripts/train_ppo_optimized.py \
     --learning-rate 3e-4 \
     --output-dir models/ppo_optimized
 
+# SAC (Soft Actor-Critic) - State-of-the-art continuous control
+python scripts/train_sac.py
+
 # Hyperparameter tuning (Optuna)
 python src/optimization/hyperparameter_tuning.py \
     --agent ppo \
     --n-trials 50 \
     --max-steps 50000
+```
+
+### Production Features (NEW ✨)
+
+**Configuration Management with Hydra:**
+```bash
+# Train with custom config
+python train.py agent=sac agent.learning_rate=1e-3
+
+# Override multiple parameters
+python train.py agent=ppo training.total_timesteps=500000 environment.transaction_cost=0.002
+```
+
+**Experiment Tracking with MLflow:**
+```bash
+# View experiments
+mlflow ui
+
+# Track training automatically
+python scripts/train_sac.py  # Logs to MLflow automatically
+```
+
+**Walk-Forward Validation:**
+```python
+from src.backtesting.walk_forward import WalkForwardAnalyzer, WalkForwardConfig
+
+config = WalkForwardConfig(train_period=252, test_period=63, anchored=False)
+analyzer = WalkForwardAnalyzer(config)
+results = analyzer.run_analysis(data, train_fn, evaluate_fn)
+```
+
+**Code Quality & CI/CD:**
+```bash
+# Format code
+black src/ tests/ scripts/
+isort src/ tests/ scripts/
+
+# Run linting
+flake8 src/ --max-line-length=120
+
+# Run tests
+pytest tests/ -v --cov=src
+
+# CI/CD automatically runs on push via GitHub Actions
 ```
 
 ---
