@@ -13,8 +13,8 @@
    ```
    Repository: mohin-io/Stochastic-Control-for-Continuous-Time-Portfolios--Deep-Reinforcement-Learning-for-Dynamic-Asset
    Branch: master
-   Main file path: app_agentic.py
-   App URL (optional): stochastic-control-agentic
+   Main file path: app.py
+   App URL (optional): stochastic-control-for-continuous-time-portfolios
    ```
 
 4. **Advanced settings (optional):**
@@ -23,26 +23,13 @@
 
 5. **Click "Deploy"**
 
-The app will be available at: `https://stochastic-control-agentic.streamlit.app`
-
----
-
-### Deploying the Classic RL Dashboard
-
-For the original dashboard, use the same steps but:
-
-```
-Main file path: app.py
-App URL (optional): stochastic-control-for-continuous-time-portfolios
-```
-
 The app will be available at: `https://stochastic-control-for-continuous-time-portfolios.streamlit.app`
 
 ---
 
 ## Local Deployment
 
-### Run Agentic Dashboard Locally
+### Run Dashboard Locally
 
 ```bash
 # Navigate to project directory
@@ -52,23 +39,17 @@ cd "d:\Stochastic Control for Continuous - Time Portfolios"
 pip install -r requirements.txt
 pip install -r requirements-app.txt
 
-# Run the agentic app
-streamlit run app_agentic.py
+# Run the app
+streamlit run app.py
 ```
 
 The dashboard will open at: `http://localhost:8501`
-
-### Run Classic Dashboard Locally
-
-```bash
-streamlit run app.py
-```
 
 ---
 
 ## Requirements
 
-Both dashboards require:
+The dashboard requires:
 - Python 3.9+
 - All dependencies from `requirements.txt` and `requirements-app.txt`
 - No trained models required (uses synthetic data for demo)

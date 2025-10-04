@@ -11,38 +11,39 @@
 
 > **Modern Evolution of Merton's Portfolio Theory**: Combining Deep Reinforcement Learning with Market Regime Detection for Adaptive Asset Allocation
 
-## 🎮 **Live Interactive Demos**
+## 🎮 **Live Interactive Dashboard**
 
 <div align="center">
 
-### 🤖 **[NEW: Agentic Portfolio Manager](https://stochastic-control-agentic.streamlit.app)** 🤖
+### 🤖 **[Launch Agentic Portfolio Manager](https://stochastic-control-for-continuous-time-portfolios.streamlit.app)** 🤖
 
 *Multi-Agent System for Volatility-Aware Portfolio Management*
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://stochastic-control-agentic.streamlit.app)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://stochastic-control-for-continuous-time-portfolios.streamlit.app)
 
-**Agentic Features:**
-- 🔍 **Volatility Detection Agent** - Real-time regime classification (6 volatility levels)
-- ⚠️ **Risk Management Agent** - VaR, CVaR, drawdown monitoring
-- 📊 **Regime Detection Agent** - Bull/Bear/Crisis identification
-- ⚖️ **Adaptive Rebalancing Agent** - Dynamic timing & thresholds
-- 📈 **Volatility Forecasting Agent** - GARCH-inspired predictions
-- 🎛️ **Agent Coordinator** - Unified decision-making
+**✨ Interactive Features:**
+- 🎛️ **Multi-Agent Control Center** - Real-time coordination of 6 specialized agents
+- 📊 **Volatility Analytics Lab** - Interactive gauge charts, regime timelines, VIX tracking
+- ⚠️ **Risk Shield** - VaR/CVaR monitoring, drawdown analysis, correlation heatmaps
+- 📈 **Portfolio Matrix** - Dynamic allocation charts, weight comparison, rebalancing
+- 🔮 **Forecast Engine** - 5-day volatility predictions with confidence intervals
 
-[📖 Read Agentic System Documentation](docs/AGENTIC_SYSTEM.md)
+**🤖 Active Agents:**
+- 🔍 **Volatility Detection Agent** - 6-level regime classification with real-time gauges
+- ⚠️ **Risk Management Agent** - Adaptive cash allocation (5% → 50% in crisis)
+- 📊 **Regime Detection Agent** - Bull/Bear/Crisis/Sideways identification
+- ⚖️ **Adaptive Rebalancing Agent** - Dynamic thresholds based on volatility
+- 📈 **Volatility Forecasting Agent** - GARCH-inspired multi-horizon forecasts
+- 🎛️ **Agent Coordinator** - Consensus-based unified decision-making
 
----
+**🎨 Modern UI:**
+- Gradient backgrounds with smooth animations
+- Interactive hover effects on all cards
+- Pulse animations for critical alerts
+- Color-coded volatility zones
+- Professional charts with Plotly
 
-### 📊 **[Classic RL Dashboard](https://stochastic-control-for-continuous-time-portfolios.streamlit.app)** 📊
-
-*Experience real-time portfolio allocation with Deep RL agents*
-
-**Classic Features:**
-- 📈 Live Portfolio Performance Visualization
-- 🎯 Strategy Comparison (5 Baselines + 3 RL Agents)
-- 📊 Dynamic Asset Allocation Charts
-- 📉 Real-Time Risk Analysis & Drawdowns
-- 🤖 RL Training Progress Dashboard
+[📖 Read Full Agentic System Documentation](docs/AGENTIC_SYSTEM.md)
 
 </div>
 

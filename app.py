@@ -1,10 +1,6 @@
 """
-Interactive Dashboard: Deep RL for Portfolio Allocation
-
-Real-time visualization of stochastic control and deep reinforcement learning
-for dynamic asset allocation across equities, bonds, gold, and cryptocurrency.
-
-Run: streamlit run app.py
+Agentic Portfolio Management Dashboard
+Multi-Agent System for Volatility-Aware Portfolio Allocation
 """
 
 import streamlit as st
@@ -12,134 +8,220 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
-from plotly.subplots import make_subplots
 from pathlib import Path
 import sys
-import torch
-
-# Page config
-st.set_page_config(
-    page_title="Deep RL Portfolio Allocation",
-    page_icon="📈",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+from datetime import datetime, timedelta
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from baselines import (
-    MertonStrategy,
-    MeanVarianceStrategy,
-    EqualWeightStrategy,
-    BuyAndHoldStrategy,
-    RiskParityStrategy
+from agents.volatility_agents import (
+    AgentCoordinator,
+    VolatilityRegime,
+    MarketRegime
 )
 
-# Custom CSS
+# Page config
+st.set_page_config(
+    page_title="Agentic Portfolio Manager",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Enhanced Custom CSS with Modern UI
 st.markdown("""
 <style>
+    /* Main theme */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    /* Headers with animations */
     .main-header {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #1f77b4;
+        font-size: 3.5rem;
+        font-weight: 900;
         text-align: center;
-        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+        animation: fadeInDown 1s ease-in;
     }
+
     .sub-header {
-        font-size: 1.5rem;
-        color: #555;
+        font-size: 1.3rem;
         text-align: center;
+        color: #555;
+        margin-top: 0;
         margin-bottom: 2rem;
+        animation: fadeIn 1.5s ease-in;
     }
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #1f77b4;
+
+    /* Enhanced alert banners with gradients and animations */
+    .alert-red {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+        border-left: 5px solid #c92a2a;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        animation: pulse 2s infinite;
     }
+
+    .alert-yellow {
+        background: linear-gradient(135deg, #ffd93d 0%, #ffb700 100%);
+        color: #333;
+        border-left: 5px solid #f59f00;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .alert-green {
+        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        color: white;
+        border-left: 5px solid #2f9e44;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    /* Agent cards with hover effects */
+    .agent-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        padding: 25px;
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        margin: 15px 0;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .agent-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        border-color: #667eea;
+    }
+
+    .agent-card h4 {
+        color: #667eea;
+        font-weight: 700;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+
+    /* Enhanced buttons */
+    .stButton>button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Enhanced tabs */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 2rem;
+        gap: 8px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px 8px 0 0;
+        padding: 10px 20px;
+        font-weight: 600;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    /* Metric cards */
+    div[data-testid="metric-container"] {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    div[data-testid="metric-container"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 12px rgba(0,0,0,0.15);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Title
-st.markdown('<div class="main-header">📈 Deep RL for Portfolio Allocation</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Stochastic Control for Continuous-Time Portfolios</div>', unsafe_allow_html=True)
+# Header
+st.markdown('<div class="main-header">🤖 Agentic Portfolio Manager</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Multi-Agent System for Volatility-Aware Asset Allocation</div>', unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
-    st.image("https://img.shields.io/badge/Python-3.9+-blue", width='content')
-    st.image("https://img.shields.io/badge/PyTorch-2.0+-red", width='content')
-    st.image("https://img.shields.io/badge/License-MIT-green", width='content')
-
-    st.markdown("---")
-    st.markdown("### 🎯 Project Overview")
+    st.markdown("### 🎯 System Overview")
     st.markdown("""
-    This dashboard demonstrates:
-    - **Deep RL Algorithms**: DQN, PPO, SAC
-    - **Classical Baselines**: Merton, Mean-Variance, Equal-Weight
-    - **Market Data**: 10 years (2014-2024)
-    - **Assets**: SPY, TLT, GLD, BTC
+    **Active Agents:**
+    - 🔍 Volatility Detection Agent
+    - ⚠️ Risk Management Agent
+    - 📊 Regime Detection Agent
+    - ⚖️ Adaptive Rebalancing Agent
+    - 📈 Volatility Forecasting Agent
+    - 🎛️ Agent Coordinator
     """)
 
     st.markdown("---")
-    st.markdown("### 📊 Data Settings")
-
-    data_source = st.selectbox(
-        "Data Source",
-        ["Historical (2014-2024)", "Simulation Mode"]
-    )
-
-    if data_source == "Historical (2014-2024)":
-        date_range = st.slider(
-            "Date Range",
-            min_value=0,
-            max_value=100,
-            value=(0, 100),
-            format="%d%%"
-        )
-
-    st.markdown("---")
-    st.markdown("### 🤖 Algorithm Selection")
-
-    show_baselines = st.multiselect(
-        "Baseline Strategies",
-        ["Merton", "Mean-Variance", "Equal-Weight", "Buy-and-Hold", "Risk Parity"],
-        default=["Equal-Weight", "Mean-Variance"]
-    )
-
-    show_rl = st.multiselect(
-        "RL Agents",
-        ["DQN (Discrete)", "PPO (Continuous)", "SAC (Continuous)"],
-        default=[]
-    )
-
-    st.markdown("---")
-    st.markdown("### ⚙️ Parameters")
+    st.markdown("### ⚙️ Configuration")
 
     initial_capital = st.number_input(
         "Initial Capital ($)",
         min_value=10000,
-        max_value=1000000,
-        value=100000,
-        step=10000
+        max_value=10000000,
+        value=1000000,
+        step=50000
     )
 
-    transaction_cost = st.slider(
-        "Transaction Cost (%)",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.1,
-        step=0.05
-    ) / 100
+    risk_tolerance = st.select_slider(
+        "Risk Tolerance",
+        options=["Very Conservative", "Conservative", "Moderate", "Aggressive", "Very Aggressive"],
+        value="Moderate"
+    )
+
+    rebalancing_mode = st.selectbox(
+        "Rebalancing Mode",
+        ["Adaptive (Agent-Controlled)", "Daily", "Weekly", "Monthly"]
+    )
 
     st.markdown("---")
-    st.markdown("### 🔗 Links")
-    st.markdown("[📄 Documentation](https://github.com/mohin-io/deep-rl-portfolio-allocation)")
-    st.markdown("[📊 Paper](https://github.com/mohin-io/deep-rl-portfolio-allocation/blob/master/docs/PROJECT_SUMMARY.md)")
-    st.markdown("[💻 Code](https://github.com/mohin-io/deep-rl-portfolio-allocation)")
+    st.markdown("### 📊 Agent Status")
 
 # Load data
 @st.cache_data
@@ -150,759 +232,536 @@ def load_market_data():
         df = pd.read_csv(data_path, index_col=0, parse_dates=True)
         return df
     else:
-        # Generate synthetic data for demo
-        dates = pd.date_range(start='2014-01-01', end='2024-12-31', freq='D')
+        # Generate synthetic data
+        dates = pd.date_range(start='2020-01-01', end='2024-12-31', freq='D')
         np.random.seed(42)
 
-        # Simulate realistic price paths
-        spy = 100 * np.exp(np.cumsum(np.random.normal(0.0005, 0.01, len(dates))))
-        tlt = 100 * np.exp(np.cumsum(np.random.normal(0.0002, 0.008, len(dates))))
-        gld = 100 * np.exp(np.cumsum(np.random.normal(0.0003, 0.009, len(dates))))
-        btc = 100 * np.exp(np.cumsum(np.random.normal(0.002, 0.04, len(dates))))
+        spy = 300 * np.exp(np.cumsum(np.random.normal(0.0005, 0.01, len(dates))))
+        tlt = 120 * np.exp(np.cumsum(np.random.normal(0.0002, 0.008, len(dates))))
+        gld = 150 * np.exp(np.cumsum(np.random.normal(0.0003, 0.012, len(dates))))
+        btc = 8000 * np.exp(np.cumsum(np.random.normal(0.002, 0.04, len(dates))))
 
         df = pd.DataFrame({
             'price_SPY': spy,
             'price_TLT': tlt,
             'price_GLD': gld,
-            'price_BTC-USD': btc,
+            'price_BTC': btc
         }, index=dates)
 
-        # Calculate returns
-        for col in ['SPY', 'TLT', 'GLD', 'BTC-USD']:
-            df[f'return_{col}'] = df[f'price_{col}'].pct_change()
+        for col in df.columns:
+            df[f'return_{col.split("_")[1]}'] = df[col].pct_change()
 
-        # Add VIX simulation
-        df['VIX'] = 15 + 10 * np.abs(np.random.normal(0, 1, len(dates)))
+        df['vix'] = 16 + np.random.normal(0, 5, len(dates)) + \
+                    np.where(np.random.random(len(dates)) > 0.95, 20, 0)
+        df['vix'] = df['vix'].clip(10, 80)
 
         return df.dropna()
 
-@st.cache_data
-def load_baseline_results():
-    """Load baseline strategy results"""
-    results_path = Path("simulations/baseline_results/baseline_comparison.csv")
-    if results_path.exists():
-        return pd.read_csv(results_path)
-    else:
-        # Return demo data
-        return pd.DataFrame({
-            'Strategy': ['Merton', 'Mean-Variance', 'Equal-Weight', 'Buy-and-Hold', 'Risk Parity'],
-            'Total Return (%)': [1176.18, 1442.61, 1056.91, 626.85, 804.65],
-            'Annual Return (%)': [27.21, 29.44, 26.11, 21.02, 23.51],
-            'Volatility (%)': [32.14, 39.12, 28.45, 32.40, 29.85],
-            'Sharpe Ratio': [0.778, 0.692, 0.845, 0.597, 0.723],
-            'Sortino Ratio': [1.155, 1.027, 1.255, 0.885, 1.074],
-            'Max Drawdown (%)': [31.98, 33.17, 36.59, 36.26, 29.44],
-        })
+# Initialize agent coordinator
+@st.cache_resource
+def get_agent_coordinator():
+    return AgentCoordinator()
 
-# Load data
 df = load_market_data()
-baseline_results = load_baseline_results()
+coordinator = get_agent_coordinator()
+
+# Extract assets
+price_cols = [col for col in df.columns if col.startswith('price_')]
+return_cols = [col for col in df.columns if col.startswith('return_')]
+n_assets = len(price_cols)
+
+# Current portfolio state
+if 'portfolio_value' not in st.session_state:
+    st.session_state.portfolio_value = initial_capital
+    st.session_state.weights = np.ones(n_assets) / n_assets
+    st.session_state.days_since_rebalance = 0
+    st.session_state.rebalance_history = []
+
+# Get latest data
+latest_prices = df[price_cols].iloc[-1]
+latest_returns = df[return_cols].iloc[-252:]  # Last year
+latest_vix = df['vix'].iloc[-1] if 'vix' in df.columns else None
+
+# Get agent recommendation
+recommendation = coordinator.get_portfolio_recommendation(
+    prices=df[price_cols].iloc[-252:],
+    returns=df[return_cols].iloc[-252:],
+    current_weights=st.session_state.weights,
+    portfolio_value=st.session_state.portfolio_value,
+    vix=latest_vix,
+    days_since_rebalance=st.session_state.days_since_rebalance
+)
 
 # Main tabs
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 Live Portfolio",
-    "📈 Strategy Comparison",
-    "🎯 Asset Allocation",
-    "📉 Risk Analysis",
-    "🤖 RL Agent Training"
+    "🎛️ Agent Dashboard",
+    "📊 Volatility Analysis",
+    "⚠️ Risk Management",
+    "📈 Portfolio Allocation",
+    "🔮 Forecasting"
 ])
 
-# Tab 1: Live Portfolio
+# Tab 1: Agent Dashboard
 with tab1:
-    st.markdown("## 📊 Real-Time Portfolio Performance")
+    st.markdown("## 🎛️ Multi-Agent Control Center")
+
+    # Alert banner
+    alert_level = recommendation['alert_level']
+    vol_signal = recommendation['volatility_signal']
+
+    if alert_level == 'red':
+        st.markdown(f"""
+        <div class="alert-red">
+            <h3>🚨 HIGH VOLATILITY ALERT</h3>
+            <p><strong>Current Regime:</strong> {vol_signal.regime.name}</p>
+            <p><strong>Volatility:</strong> {vol_signal.current_vol:.2f}% (Forecasted: {vol_signal.forecasted_vol:.2f}%)</p>
+            <p><strong>Recommended Action:</strong> Reduce risk exposure, increase cash to {recommendation['recommended_cash']*100:.0f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
+    elif alert_level == 'yellow':
+        st.markdown(f"""
+        <div class="alert-yellow">
+            <h3>⚠️ ELEVATED VOLATILITY WARNING</h3>
+            <p><strong>Current Regime:</strong> {vol_signal.regime.name}</p>
+            <p><strong>Volatility:</strong> {vol_signal.current_vol:.2f}% (Forecasted: {vol_signal.forecasted_vol:.2f}%)</p>
+            <p><strong>Recommended Action:</strong> Monitor closely, consider defensive positioning</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div class="alert-green">
+            <h3>✅ NORMAL MARKET CONDITIONS</h3>
+            <p><strong>Current Regime:</strong> {vol_signal.regime.name}</p>
+            <p><strong>Volatility:</strong> {vol_signal.current_vol:.2f}% (Forecasted: {vol_signal.forecasted_vol:.2f}%)</p>
+            <p><strong>Status:</strong> All systems nominal</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Agent status cards
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("""
+        <div class="agent-card">
+            <h4>🔍 Volatility Detection Agent</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        st.metric("Current Regime", vol_signal.regime.name.replace('_', ' '))
+        st.metric("Confidence", f"{vol_signal.confidence*100:.1f}%")
+        st.metric("Alert Level", alert_level.upper())
+
+        # Add volatility gauge
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=vol_signal.current_vol,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            title={'text': "Current Vol %", 'font': {'size': 14}},
+            gauge={
+                'axis': {'range': [None, 50], 'tickwidth': 1},
+                'bar': {'color': "#667eea"},
+                'steps': [
+                    {'range': [0, 12], 'color': "rgba(81, 207, 102, 0.3)"},
+                    {'range': [12, 20], 'color': "rgba(255, 217, 61, 0.3)"},
+                    {'range': [20, 30], 'color': "rgba(255, 183, 0, 0.3)"},
+                    {'range': [30, 50], 'color': "rgba(255, 107, 107, 0.3)"}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 3},
+                    'thickness': 0.75,
+                    'value': 30
+                }
+            }
+        ))
+        fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
+        st.plotly_chart(fig_gauge, use_container_width=True, key="vol_gauge")
+
+    with col2:
+        st.markdown("""
+        <div class="agent-card">
+            <h4>⚠️ Risk Management Agent</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        risk_signal = recommendation['risk_signal']
+        st.metric("Recommended Cash", f"{risk_signal.recommended_cash*100:.1f}%")
+        st.metric("VaR Breach", "⚠️ YES" if risk_signal.var_breach else "✅ NO")
+        st.metric("Correlation Spike", "⚠️ YES" if risk_signal.correlation_spike else "✅ NO")
+
+    with col3:
+        st.markdown("""
+        <div class="agent-card">
+            <h4>📊 Regime Detection Agent</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        market_regime = recommendation['market_regime']
+        st.metric("Market Regime", market_regime.name.replace('_', ' '))
+        st.metric("Rebalance Needed", "⚖️ YES" if recommendation['should_rebalance'] else "✅ NO")
+        st.metric("Days Since Rebalance", st.session_state.days_since_rebalance)
+
+    st.markdown("---")
+
+    # Portfolio metrics
+    st.markdown("### 📊 Current Portfolio Status")
 
     col1, col2, col3, col4 = st.columns(4)
 
-    # Calculate portfolio metrics (using Equal-Weight as default)
-    returns = df[[col for col in df.columns if col.startswith('return_')]].dropna()
-    portfolio_return = returns.mean(axis=1)
-    cumulative_return = (1 + portfolio_return).cumprod()
-
-    total_return = (cumulative_return.iloc[-1] - 1) * 100
-    annual_return = ((1 + total_return/100) ** (252/len(returns)) - 1) * 100
-    volatility = portfolio_return.std() * np.sqrt(252) * 100
-    sharpe = (annual_return - 2) / volatility if volatility > 0 else 0
+    portfolio_returns = (df[return_cols].iloc[-1:] * st.session_state.weights).sum().values
+    total_return = ((st.session_state.portfolio_value - initial_capital) / initial_capital) * 100
 
     with col1:
-        st.metric("Total Return", f"{total_return:.2f}%", f"+{annual_return:.2f}% p.a.")
+        st.metric("Portfolio Value", f"${st.session_state.portfolio_value:,.0f}")
 
     with col2:
-        st.metric("Sharpe Ratio", f"{sharpe:.3f}", "Risk-Adjusted")
+        st.metric("Total Return", f"{total_return:.2f}%")
 
     with col3:
-        st.metric("Volatility", f"{volatility:.2f}%", "Annualized")
+        current_vol = (df[return_cols].iloc[-252:] @ st.session_state.weights).std() * np.sqrt(252) * 100
+        st.metric("Portfolio Volatility", f"{current_vol:.2f}%")
 
     with col4:
-        max_dd = ((cumulative_return / cumulative_return.expanding().max()) - 1).min() * 100
-        st.metric("Max Drawdown", f"{max_dd:.2f}%", "Worst Peak-to-Trough")
+        sharpe = (total_return - 2) / current_vol if current_vol > 0 else 0
+        st.metric("Sharpe Ratio", f"{sharpe:.3f}")
 
-    st.markdown("---")
+    # Weight comparison
+    st.markdown("### ⚖️ Portfolio Weights: Current vs Recommended")
 
-    # Portfolio value chart
-    st.markdown("### 💰 Portfolio Value Evolution")
+    assets = [col.replace('price_', '') for col in price_cols]
+    weight_comparison = pd.DataFrame({
+        'Asset': assets,
+        'Current Weight (%)': st.session_state.weights * 100,
+        'Recommended Weight (%)': recommendation['recommended_weights'] * 100,
+        'Drift (%)': (st.session_state.weights - recommendation['recommended_weights']) * 100
+    })
 
     fig = go.Figure()
-
-    portfolio_value = initial_capital * cumulative_return
-
-    fig.add_trace(go.Scatter(
-        x=df.index[-len(portfolio_value):],
-        y=portfolio_value,
-        mode='lines',
-        name='Portfolio Value',
-        line=dict(color='#1f77b4', width=2),
-        fill='tonexty',
-        fillcolor='rgba(31, 119, 180, 0.1)'
+    fig.add_trace(go.Bar(
+        name='Current',
+        x=assets,
+        y=st.session_state.weights * 100,
+        marker_color='lightblue'
     ))
-
+    fig.add_trace(go.Bar(
+        name='Recommended',
+        x=assets,
+        y=recommendation['recommended_weights'] * 100,
+        marker_color='darkblue'
+    ))
     fig.update_layout(
-        title="Portfolio Growth Over Time",
-        xaxis_title="Date",
-        yaxis_title="Portfolio Value ($)",
-        hovermode='x unified',
-        height=500,
-        template='plotly_white'
+        title="Weight Comparison",
+        barmode='group',
+        yaxis_title="Weight (%)",
+        height=400
     )
-
     st.plotly_chart(fig, width='stretch')
 
-    # Asset performance
+    st.dataframe(weight_comparison, width='stretch')
+
+    # Rebalance button
+    if recommendation['should_rebalance']:
+        if st.button("🔄 Execute Rebalance (Agent Recommended)", type="primary"):
+            st.session_state.weights = recommendation['recommended_weights']
+            st.session_state.days_since_rebalance = 0
+            st.session_state.rebalance_history.append({
+                'date': datetime.now(),
+                'regime': vol_signal.regime.name,
+                'weights': recommendation['recommended_weights'].copy()
+            })
+            st.success("✅ Portfolio rebalanced successfully!")
+            st.rerun()
+
+
+# Tab 2: Volatility Analysis
+with tab2:
+    st.markdown("## 📊 Comprehensive Volatility Analysis")
+
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 📈 Individual Asset Performance")
+        st.markdown("### 📈 Volatility Regimes Over Time")
 
-        asset_returns = {}
-        for col in ['SPY', 'TLT', 'GLD', 'BTC-USD']:
-            price_col = f'price_{col}'
-            if price_col in df.columns:
-                asset_returns[col] = (df[price_col].iloc[-1] / df[price_col].iloc[0] - 1) * 100
+        # Calculate rolling volatility
+        portfolio_returns = (df[return_cols] @ st.session_state.weights)
+        rolling_vol = portfolio_returns.rolling(20).std() * np.sqrt(252) * 100
 
-        asset_df = pd.DataFrame(list(asset_returns.items()), columns=['Asset', 'Return (%)'])
-        asset_df = asset_df.sort_values('Return (%)', ascending=False)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df.index[-252:],
+            y=rolling_vol.iloc[-252:],
+            mode='lines',
+            name='Realized Vol',
+            fill='tozeroy',
+            line=dict(color='blue')
+        ))
 
-        fig = px.bar(
-            asset_df,
-            x='Asset',
-            y='Return (%)',
-            color='Return (%)',
-            color_continuous_scale='RdYlGn',
-            title="Total Returns by Asset"
+        # Add regime thresholds
+        fig.add_hline(y=12, line_dash="dash", line_color="green", annotation_text="Low Vol")
+        fig.add_hline(y=20, line_dash="dash", line_color="orange", annotation_text="Elevated Vol")
+        fig.add_hline(y=30, line_dash="dash", line_color="red", annotation_text="High Vol")
+
+        fig.update_layout(
+            title="Rolling Volatility (20-day)",
+            yaxis_title="Volatility (%)",
+            height=400
         )
-
-        fig.update_layout(height=400, showlegend=False)
         st.plotly_chart(fig, width='stretch')
 
     with col2:
-        st.markdown("### 🎯 Current Allocation")
+        st.markdown("### 🎯 Volatility Distribution")
 
-        # Simulate current weights (Equal-Weight)
-        weights = [0.25, 0.25, 0.25, 0.25]
-        assets = ['SPY', 'TLT', 'GLD', 'BTC']
+        fig = go.Figure()
+        fig.add_trace(go.Histogram(
+            x=rolling_vol.dropna(),
+            nbinsx=30,
+            name='Volatility Distribution',
+            marker_color='skyblue'
+        ))
 
-        fig = go.Figure(data=[go.Pie(
-            labels=assets,
-            values=weights,
-            hole=0.4,
-            marker=dict(colors=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])
-        )])
+        fig.add_vline(
+            x=vol_signal.current_vol,
+            line_dash="dash",
+            line_color="red",
+            annotation_text="Current"
+        )
 
         fig.update_layout(
-            title="Portfolio Allocation",
+            title="Historical Volatility Distribution",
+            xaxis_title="Volatility (%)",
+            yaxis_title="Frequency",
             height=400
         )
-
         st.plotly_chart(fig, width='stretch')
-
-# Tab 2: Strategy Comparison
-with tab2:
-    st.markdown("## 📈 Strategy Performance Comparison")
-
-    # Performance table
-    st.markdown("### 📊 Performance Metrics")
-
-    # Style the dataframe with safe column checking
-    styler = baseline_results.style
-
-    # Apply gradients only if columns exist
-    if 'Sharpe Ratio' in baseline_results.columns and 'Sortino Ratio' in baseline_results.columns:
-        styler = styler.background_gradient(
-            subset=['Sharpe Ratio', 'Sortino Ratio'],
-            cmap='RdYlGn'
-        )
-
-    if 'Max Drawdown (%)' in baseline_results.columns:
-        styler = styler.background_gradient(
-            subset=['Max Drawdown (%)'],
-            cmap='RdYlGn_r'
-        )
-
-    # Format columns that exist
-    format_dict = {}
-    for col, fmt in [
-        ('Total Return (%)', '{:.2f}'),
-        ('Annual Return (%)', '{:.2f}'),
-        ('Volatility (%)', '{:.2f}'),
-        ('Sharpe Ratio', '{:.3f}'),
-        ('Sortino Ratio', '{:.3f}'),
-        ('Max Drawdown (%)', '{:.2f}')
-    ]:
-        if col in baseline_results.columns:
-            format_dict[col] = fmt
-
-    styled_df = styler.format(format_dict)
-
-    st.dataframe(styled_df, width='stretch', height=250)
 
     st.markdown("---")
 
-    # Risk-Return scatter
+    # VIX analysis
+    if 'vix' in df.columns:
+        st.markdown("### 📊 VIX Fear Index Analysis")
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df.index[-252:],
+            y=df['vix'].iloc[-252:],
+            mode='lines',
+            name='VIX',
+            line=dict(color='purple')
+        ))
+
+        # Color zones
+        fig.add_hrect(y0=0, y1=12, fillcolor="green", opacity=0.1, annotation_text="Calm")
+        fig.add_hrect(y0=12, y1=20, fillcolor="yellow", opacity=0.1, annotation_text="Normal")
+        fig.add_hrect(y0=20, y1=30, fillcolor="orange", opacity=0.1, annotation_text="Elevated")
+        fig.add_hrect(y0=30, y1=100, fillcolor="red", opacity=0.1, annotation_text="High Fear")
+
+        fig.update_layout(
+            title="VIX Index (Market Fear Gauge)",
+            yaxis_title="VIX Level",
+            height=500
+        )
+        st.plotly_chart(fig, width='stretch')
+
+
+# Tab 3: Risk Management
+with tab3:
+    st.markdown("## ⚠️ Advanced Risk Management")
+
+    risk_signal = recommendation['risk_signal']
+
+    col1, col2, col3 = st.columns(3)
+
+    # Calculate risk metrics
+    portfolio_returns = (df[return_cols].iloc[-252:] @ st.session_state.weights)
+
+    with col1:
+        var_95 = np.percentile(portfolio_returns, 5) * 100
+        st.metric("VaR (95%)", f"{var_95:.2f}%", help="Maximum loss expected 95% of the time")
+
+    with col2:
+        var_99 = np.percentile(portfolio_returns, 1) * 100
+        st.metric("VaR (99%)", f"{var_99:.2f}%", help="Maximum loss expected 99% of the time")
+
+    with col3:
+        cvar_95 = portfolio_returns[portfolio_returns <= np.percentile(portfolio_returns, 5)].mean() * 100
+        st.metric("CVaR (95%)", f"{cvar_95:.2f}%", help="Expected loss when VaR is breached")
+
+    st.markdown("---")
+
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 🎯 Risk-Return Profile")
+        st.markdown("### 📉 Drawdown Analysis")
 
-        # Check required columns exist
-        if all(col in baseline_results.columns for col in ['Volatility (%)', 'Annual Return (%)', 'Sharpe Ratio', 'Strategy']):
-            fig = px.scatter(
-                baseline_results,
-                x='Volatility (%)',
-                y='Annual Return (%)',
-                size='Sharpe Ratio',
-                color='Sharpe Ratio',
-                text='Strategy',
-                color_continuous_scale='RdYlGn',
-                title="Risk vs Return (Bubble Size = Sharpe Ratio)"
-            )
-
-            fig.update_traces(textposition='top center')
-            fig.update_layout(height=500)
-
-            st.plotly_chart(fig, width='stretch')
-        else:
-            st.warning("Risk-Return data not available. Run baseline strategies first.")
-
-    with col2:
-        st.markdown("### 📉 Maximum Drawdown Comparison")
-
-        # Check required columns exist
-        if all(col in baseline_results.columns for col in ['Strategy', 'Max Drawdown (%)']):
-            fig = px.bar(
-                baseline_results.sort_values('Max Drawdown (%)'),
-                x='Strategy',
-                y='Max Drawdown (%)',
-                color='Max Drawdown (%)',
-                color_continuous_scale='RdYlGn_r',
-                title="Worst Peak-to-Trough Decline"
-            )
-
-            fig.update_layout(height=500, showlegend=False)
-            st.plotly_chart(fig, width='stretch')
-        else:
-            st.warning("Drawdown data not available. Run baseline strategies first.")
-
-    # Radar chart
-    st.markdown("### 🕸️ Multi-Metric Performance Radar")
-
-    # Check required columns for radar chart
-    required_radar_cols = ['Sharpe Ratio', 'Sortino Ratio', 'Total Return (%)', 'Max Drawdown (%)', 'Strategy']
-    if all(col in baseline_results.columns for col in required_radar_cols):
-        # Normalize metrics for radar chart
-        metrics = ['Sharpe Ratio', 'Sortino Ratio', 'Total Return (%)']
-        categories = metrics + ['Risk Control']
-
-        # Add inverted drawdown as "Risk Control"
-        baseline_results_copy = baseline_results.copy()
-        baseline_results_copy['Risk Control'] = 100 - baseline_results_copy['Max Drawdown (%)']
+        cumulative = (1 + portfolio_returns).cumprod()
+        running_max = cumulative.expanding().max()
+        drawdown = (cumulative - running_max) / running_max * 100
 
         fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df.index[-252:],
+            y=drawdown,
+            mode='lines',
+            fill='tozeroy',
+            name='Drawdown',
+            line=dict(color='red')
+        ))
 
-        for i, row in baseline_results_copy.iterrows():
-            values = []
-            for metric in metrics:
-                val = row[metric]
-                min_val = baseline_results_copy[metric].min()
-                max_val = baseline_results_copy[metric].max()
-                normalized = (val - min_val) / (max_val - min_val) if max_val > min_val else 0.5
-                values.append(normalized)
+        fig.add_hline(
+            y=-20,
+            line_dash="dash",
+            line_color="darkred",
+            annotation_text="Max DD Threshold"
+        )
 
-            # Add risk control
-            rc_val = row['Risk Control']
-            rc_min = baseline_results_copy['Risk Control'].min()
-            rc_max = baseline_results_copy['Risk Control'].max()
-            values.append((rc_val - rc_min) / (rc_max - rc_min) if rc_max > rc_min else 0.5)
+        fig.update_layout(
+            title="Portfolio Drawdown",
+            yaxis_title="Drawdown (%)",
+            height=400
+        )
+        st.plotly_chart(fig, width='stretch')
 
-            values.append(values[0])  # Close the polygon
+    with col2:
+        st.markdown("### 🔗 Asset Correlation Matrix")
 
-            fig.add_trace(go.Scatterpolar(
-                r=values,
-                theta=categories + [categories[0]],
-                fill='toself',
-                name=row['Strategy']
+        corr_matrix = df[return_cols].iloc[-252:].corr()
+        asset_names = [col.replace('return_', '') for col in return_cols]
+
+        fig = go.Figure(data=go.Heatmap(
+            z=corr_matrix.values,
+            x=asset_names,
+            y=asset_names,
+            colorscale='RdYlGn',
+            zmid=0,
+            text=corr_matrix.values.round(2),
+            texttemplate='%{text}',
+            textfont={"size": 12}
+        ))
+
+        fig.update_layout(
+            title="Asset Correlation Matrix",
+            height=400
+        )
+        st.plotly_chart(fig, width='stretch')
+
+    # Risk alerts
+    st.markdown("### 🚨 Active Risk Alerts")
+
+    alerts = []
+    if risk_signal.max_drawdown_alert:
+        alerts.append("⚠️ Maximum drawdown threshold exceeded")
+    if risk_signal.var_breach:
+        alerts.append("⚠️ VaR breach detected")
+    if risk_signal.correlation_spike:
+        alerts.append("⚠️ Correlation spike - systemic risk warning")
+
+    if alerts:
+        for alert in alerts:
+            st.error(alert)
+    else:
+        st.success("✅ No active risk alerts")
+
+
+# Tab 4: Portfolio Allocation
+with tab4:
+    st.markdown("## 📈 Dynamic Portfolio Allocation")
+
+    # Allocation evolution
+    st.markdown("### 📊 Recommended Allocation Evolution")
+
+    # Simulate allocation over time (last 60 days)
+    allocation_history = []
+    for i in range(-60, 0):
+        try:
+            rec = coordinator.get_portfolio_recommendation(
+                prices=df[price_cols].iloc[i-252:i],
+                returns=df[return_cols].iloc[i-252:i],
+                current_weights=st.session_state.weights,
+                portfolio_value=st.session_state.portfolio_value,
+                vix=df['vix'].iloc[i] if 'vix' in df.columns else None,
+                days_since_rebalance=0
+            )
+            allocation_history.append(rec['recommended_weights'])
+        except:
+            continue
+
+    if allocation_history:
+        allocation_df = pd.DataFrame(
+            allocation_history,
+            columns=[col.replace('price_', '') for col in price_cols]
+        )
+
+        fig = go.Figure()
+        for col in allocation_df.columns:
+            fig.add_trace(go.Scatter(
+                x=list(range(len(allocation_df))),
+                y=allocation_df[col] * 100,
+                mode='lines',
+                name=col,
+                stackgroup='one'
             ))
 
         fig.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-            showlegend=True,
-            height=600,
-            title="Normalized Performance Metrics"
+            title="Agent-Recommended Allocation Over Time",
+            yaxis_title="Allocation (%)",
+            xaxis_title="Days Ago",
+            height=500
         )
-
         st.plotly_chart(fig, width='stretch')
-    else:
-        st.warning("Performance metrics not available. Run baseline strategies first.")
 
-# Tab 3: Asset Allocation
-with tab3:
-    st.markdown("## 🎯 Dynamic Asset Allocation")
 
-    strategy_select = st.selectbox(
-        "Select Strategy to Visualize",
-        ["Equal-Weight", "Mean-Variance", "Risk Parity", "Merton"]
-    )
+# Tab 5: Forecasting
+with tab5:
+    st.markdown("## 🔮 Volatility Forecasting")
 
-    # Simulate allocation over time
-    n_points = min(500, len(df))
-    dates = df.index[-n_points:]
-
-    if strategy_select == "Equal-Weight":
-        weights_spy = np.ones(n_points) * 0.25
-        weights_tlt = np.ones(n_points) * 0.25
-        weights_gld = np.ones(n_points) * 0.25
-        weights_btc = np.ones(n_points) * 0.25
-    elif strategy_select == "Buy-and-Hold":
-        weights_spy = np.ones(n_points) * 0.5
-        weights_tlt = np.ones(n_points) * 0.25
-        weights_gld = np.ones(n_points) * 0.15
-        weights_btc = np.ones(n_points) * 0.10
-    else:
-        # Simulate dynamic allocation with some variation
-        np.random.seed(42)
-        base = np.array([0.4, 0.3, 0.2, 0.1])
-        noise = np.random.normal(0, 0.05, (n_points, 4))
-        weights_matrix = base + noise
-        weights_matrix = np.maximum(weights_matrix, 0)
-        weights_matrix = weights_matrix / weights_matrix.sum(axis=1, keepdims=True)
-
-        weights_spy = weights_matrix[:, 0]
-        weights_tlt = weights_matrix[:, 1]
-        weights_gld = weights_matrix[:, 2]
-        weights_btc = weights_matrix[:, 3]
-
-    # Stacked area chart
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(
-        x=dates, y=weights_spy,
-        mode='lines',
-        name='SPY (Equities)',
-        stackgroup='one',
-        fillcolor='rgba(31, 119, 180, 0.7)'
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=dates, y=weights_tlt,
-        mode='lines',
-        name='TLT (Bonds)',
-        stackgroup='one',
-        fillcolor='rgba(255, 127, 14, 0.7)'
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=dates, y=weights_gld,
-        mode='lines',
-        name='GLD (Gold)',
-        stackgroup='one',
-        fillcolor='rgba(44, 160, 44, 0.7)'
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=dates, y=weights_btc,
-        mode='lines',
-        name='BTC (Crypto)',
-        stackgroup='one',
-        fillcolor='rgba(214, 39, 40, 0.7)'
-    ))
-
-    fig.update_layout(
-        title=f"{strategy_select} - Asset Allocation Over Time",
-        xaxis_title="Date",
-        yaxis_title="Portfolio Weight",
-        yaxis=dict(tickformat='.0%', range=[0, 1]),
-        hovermode='x unified',
-        height=500,
-        template='plotly_white'
-    )
-
-    st.plotly_chart(fig, width='stretch')
-
-    # Turnover analysis
-    st.markdown("### 🔄 Portfolio Turnover")
+    vol_forecast = recommendation['volatility_forecast']
 
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        # Calculate turnover
-        weights_df = pd.DataFrame({
-            'SPY': weights_spy,
-            'TLT': weights_tlt,
-            'GLD': weights_gld,
-            'BTC': weights_btc
-        })
-
-        weight_changes = weights_df.diff().abs().sum(axis=1)
+        st.markdown("### 📈 5-Day Volatility Forecast")
 
         fig = go.Figure()
+
+        # Historical
+        historical_vol = (portfolio_returns.rolling(20).std() * np.sqrt(252) * 100).iloc[-30:]
         fig.add_trace(go.Scatter(
-            x=dates,
-            y=weight_changes * 100,
+            x=list(range(-len(historical_vol), 0)),
+            y=historical_vol,
             mode='lines',
-            name='Daily Turnover',
-            line=dict(color='#ff7f0e', width=1)
+            name='Historical',
+            line=dict(color='blue')
         ))
 
-        fig.add_hline(
-            y=weight_changes.mean() * 100,
-            line_dash="dash",
-            line_color="red",
-            annotation_text=f"Average: {weight_changes.mean()*100:.2f}%"
-        )
+        # Forecast
+        fig.add_trace(go.Scatter(
+            x=list(range(1, 6)),
+            y=vol_forecast,
+            mode='lines+markers',
+            name='Forecast',
+            line=dict(color='red', dash='dash')
+        ))
 
         fig.update_layout(
-            title="Portfolio Turnover Over Time",
-            xaxis_title="Date",
-            yaxis_title="Turnover (%)",
+            title="Volatility: Historical vs Forecast",
+            xaxis_title="Days",
+            yaxis_title="Volatility (%)",
             height=400
         )
-
         st.plotly_chart(fig, width='stretch')
 
     with col2:
-        st.markdown("#### 📊 Turnover Statistics")
-        st.metric("Average Daily Turnover", f"{weight_changes.mean()*100:.2f}%")
-        st.metric("Maximum Turnover", f"{weight_changes.max()*100:.2f}%")
-        st.metric("Transaction Cost Impact", f"{weight_changes.mean()*transaction_cost*100:.3f}%")
+        st.markdown("### 📊 Forecast Summary")
+        st.metric("Current Vol", f"{vol_signal.current_vol:.2f}%")
+        st.metric("Next Day Forecast", f"{vol_forecast[0]:.2f}%")
+        st.metric("5-Day Avg Forecast", f"{vol_forecast.mean():.2f}%")
 
-        st.markdown("---")
-        st.info(f"""
-        **Interpretation:**
-        - Low turnover (~0-5%) = passive strategy
-        - Medium turnover (~5-20%) = moderate rebalancing
-        - High turnover (>20%) = active management
-
-        **Current:** {weight_changes.mean()*100:.1f}% average daily turnover
-        """)
-
-# Tab 4: Risk Analysis
-with tab4:
-    st.markdown("## 📉 Risk Analysis & Drawdown")
-
-    # Calculate drawdowns for each asset
-    drawdowns = {}
-    for col in ['SPY', 'TLT', 'GLD', 'BTC-USD']:
-        price_col = f'price_{col}'
-        if price_col in df.columns:
-            prices = df[price_col]
-            running_max = prices.expanding().max()
-            drawdown = (prices - running_max) / running_max * 100
-            drawdowns[col] = drawdown
-
-    # Portfolio drawdown
-    portfolio_running_max = cumulative_return.expanding().max()
-    portfolio_drawdown = (cumulative_return - portfolio_running_max) / portfolio_running_max * 100
-
-    # Drawdown chart
-    st.markdown("### 📊 Drawdown Comparison")
-
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(
-        x=df.index[-len(portfolio_drawdown):],
-        y=portfolio_drawdown,
-        mode='lines',
-        name='Portfolio',
-        line=dict(color='black', width=3)
-    ))
-
-    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
-    for i, (asset, dd) in enumerate(drawdowns.items()):
-        fig.add_trace(go.Scatter(
-            x=df.index[-len(dd):],
-            y=dd.iloc[-len(portfolio_drawdown):],
-            mode='lines',
-            name=asset,
-            line=dict(color=colors[i], width=1, dash='dot'),
-            opacity=0.6
-        ))
-
-    fig.update_layout(
-        title="Portfolio and Asset Drawdowns Over Time",
-        xaxis_title="Date",
-        yaxis_title="Drawdown (%)",
-        hovermode='x unified',
-        height=500,
-        template='plotly_white'
-    )
-
-    # Add COVID-19 annotation
-    fig.add_vrect(
-        x0="2020-02-01", x1="2020-04-30",
-        fillcolor="red", opacity=0.1,
-        annotation_text="COVID-19 Crash", annotation_position="top left"
-    )
-
-    st.plotly_chart(fig, width='stretch')
-
-    # Risk metrics
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown("### 📉 Drawdown Metrics")
-        st.metric("Maximum Drawdown", f"{portfolio_drawdown.min():.2f}%")
-        st.metric("Average Drawdown", f"{portfolio_drawdown[portfolio_drawdown < 0].mean():.2f}%")
-        st.metric("Recovery Time", "~45 days (avg)")
-
-    with col2:
-        st.markdown("### 📊 Volatility Metrics")
-        st.metric("Daily Volatility", f"{portfolio_return.std()*100:.2f}%")
-        st.metric("Annual Volatility", f"{volatility:.2f}%")
-        st.metric("Downside Deviation", f"{portfolio_return[portfolio_return < 0].std()*np.sqrt(252)*100:.2f}%")
-
-    with col3:
-        st.markdown("### 🎯 Risk-Adjusted Metrics")
-        st.metric("Sharpe Ratio", f"{sharpe:.3f}")
-        downside_std = portfolio_return[portfolio_return < 0].std() * np.sqrt(252)
-        sortino = (annual_return - 2) / (downside_std * 100) if downside_std > 0 else 0
-        st.metric("Sortino Ratio", f"{sortino:.3f}")
-        calmar = annual_return / abs(portfolio_drawdown.min()) if portfolio_drawdown.min() < 0 else 0
-        st.metric("Calmar Ratio", f"{calmar:.3f}")
-
-    # VaR analysis
-    st.markdown("### 📈 Value at Risk (VaR) Analysis")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        # Calculate VaR
-        var_95 = np.percentile(portfolio_return.dropna(), 5) * 100
-        var_99 = np.percentile(portfolio_return.dropna(), 1) * 100
-        cvar_95 = portfolio_return[portfolio_return <= np.percentile(portfolio_return, 5)].mean() * 100
-
-        st.markdown(f"""
-        **95% VaR (1-day):** {var_95:.2f}%
-        *There's a 5% chance of losing more than {abs(var_95):.2f}% in a single day*
-
-        **99% VaR (1-day):** {var_99:.2f}%
-        *There's a 1% chance of losing more than {abs(var_99):.2f}% in a single day*
-
-        **CVaR (95%):** {cvar_95:.2f}%
-        *Expected loss when exceeding VaR threshold*
-        """)
-
-    with col2:
-        # Return distribution
-        fig = go.Figure()
-        fig.add_trace(go.Histogram(
-            x=portfolio_return.dropna() * 100,
-            nbinsx=50,
-            name='Returns',
-            marker=dict(color='#1f77b4', opacity=0.7)
-        ))
-
-        fig.add_vline(x=var_95, line_dash="dash", line_color="red", annotation_text="95% VaR")
-        fig.add_vline(x=var_99, line_dash="dash", line_color="darkred", annotation_text="99% VaR")
-
-        fig.update_layout(
-            title="Daily Return Distribution",
-            xaxis_title="Return (%)",
-            yaxis_title="Frequency",
-            height=300
-        )
-
-        st.plotly_chart(fig, width='stretch')
-
-# Tab 5: RL Training
-with tab5:
-    st.markdown("## 🤖 Reinforcement Learning Agent Training")
-
-    st.info("""
-    **Deep RL Algorithms Implemented:**
-    - **DQN**: Deep Q-Network (discrete action space)
-    - **PPO**: Proximal Policy Optimization (continuous actions)
-    - **SAC**: Soft Actor-Critic (continuous actions with entropy maximization)
-    """)
-
-    # Training progress (simulated)
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.markdown("### 🎯 DQN Training")
-        st.metric("Episodes", "219 / 1000")
-        st.metric("Progress", "21.9%")
-        st.progress(0.219)
-        st.metric("Estimated Time", "~2 hours remaining")
-
-    with col2:
-        st.markdown("### 🎯 PPO Training")
-        st.metric("Status", "Pending")
-        st.metric("Timesteps", "0 / 500K")
-        st.progress(0.0)
-        st.metric("Estimated Time", "~4-6 hours")
-
-    with col3:
-        st.markdown("### 🎯 SAC Training")
-        st.metric("Status", "Pending")
-        st.metric("Timesteps", "0 / 500K")
-        st.progress(0.0)
-        st.metric("Estimated Time", "~3-5 hours")
-
-    st.markdown("---")
-
-    # MDP Formulation
-    st.markdown("### 📐 MDP Formulation")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-        **State Space (34-dimensional):**
-        - Portfolio weights (4)
-        - Recent returns (20: 5 days × 4 assets)
-        - Rolling volatility (4)
-        - Market regime (3: one-hot encoded)
-        - VIX (1)
-        - Treasury rate (1)
-        - Portfolio value (1: normalized)
-
-        **Reward Function:**
-        ```
-        r_t = log(V_t / V_{t-1}) - λ * costs
-        ```
-        """)
-
-    with col2:
-        st.markdown("""
-        **Action Space:**
-        - **DQN (discrete):** 3 actions
-          - 0: Conservative (bonds-heavy)
-          - 1: Balanced
-          - 2: Aggressive (equities-heavy)
-
-        - **PPO/SAC (continuous):** 4-dimensional
-          - Weights for [SPY, TLT, GLD, BTC]
-          - Constraints: w_i ∈ [0,1], Σw_i = 1
-
-        **Objective:** Maximize cumulative log-utility
-        """)
-
-    # Architecture visualization
-    st.markdown("### 🏗️ Neural Network Architectures")
-
-    arch_select = st.selectbox(
-        "Select Architecture",
-        ["DQN", "PPO", "SAC"]
-    )
-
-    if arch_select == "DQN":
-        st.markdown("""
-        **DQN Architecture:**
-        ```
-        Input (34) → Dense(128) → ReLU → Dense(64) → ReLU → Output(3)
-        ```
-
-        **Key Features:**
-        - Experience Replay Buffer: 100K transitions
-        - Target Network: τ = 0.005
-        - ε-greedy exploration: 1.0 → 0.01
-        - Optimizer: Adam (lr=1e-4)
-        - Batch size: 64
-        """)
-    elif arch_select == "PPO":
-        st.markdown("""
-        **PPO Architecture (Actor-Critic):**
-        ```
-        Actor:  Input(34) → Dense(256) → ReLU → Dense(256) → ReLU → Output(4)
-        Critic: Input(34) → Dense(256) → ReLU → Dense(256) → ReLU → Output(1)
-        ```
-
-        **Key Features:**
-        - Clip Range: 0.2
-        - GAE Lambda: 0.95
-        - Parallel Envs: 8
-        - Learning Rate: 3e-4
-        - Epochs per update: 10
-        """)
-    else:  # SAC
-        st.markdown("""
-        **SAC Architecture:**
-        ```
-        Actor: Input(34) → Dense(256) → ReLU → Dense(256) → ReLU → Output(4)
-        Q1/Q2: Input(34+4) → Dense(256) → ReLU → Dense(256) → ReLU → Output(1)
-        ```
-
-        **Key Features:**
-        - Twin Q-networks for stability
-        - Automatic entropy tuning
-        - Replay Buffer: 1M transitions
-        - Learning Rate: 3e-4
-        - Tau (soft update): 0.005
-        """)
-
-    st.markdown("---")
-
-    # Expected results
-    st.markdown("### 🎯 Expected Results")
-
-    expected_results = pd.DataFrame({
-        'Algorithm': ['DQN', 'PPO', 'SAC', 'Equal-Weight (Baseline)'],
-        'Expected Sharpe': [0.65, 0.90, 0.85, 0.845],
-        'Expected Return (%)': [950, 1300, 1500, 1057],
-        'Training Time': ['3 hours', '4-6 hours', '3-5 hours', 'N/A']
-    })
-
-    st.dataframe(expected_results, width='stretch')
-
-    st.success("""
-    **Hypothesis:**
-    - PPO expected to achieve best risk-adjusted returns (Sharpe > 0.85)
-    - SAC may achieve highest total returns via entropy maximization
-    - DQN limited by discrete action space but interpretable
-    - All RL agents should outperform Buy-and-Hold (Sharpe 0.597)
-    """)
+        change = ((vol_forecast[0] - vol_signal.current_vol) / vol_signal.current_vol) * 100
+        st.metric("Expected Change", f"{change:+.1f}%")
 
 # Footer
 st.markdown("---")
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("""
-    **📊 Data**
-    - Period: 2014-2024
-    - Assets: 4 (SPY, TLT, GLD, BTC)
-    - Observations: 2,570 days
-    """)
-
-with col2:
-    st.markdown("""
-    **🤖 Algorithms**
-    - Baselines: 5 strategies
-    - RL Agents: DQN, PPO, SAC
-    - Testing: 50+ unit tests
-    """)
-
-with col3:
-    st.markdown("""
-    **🔗 Links**
-    - [GitHub Repo](https://github.com/mohin-io/deep-rl-portfolio-allocation)
-    - [Paper (PDF)](https://github.com/mohin-io/deep-rl-portfolio-allocation/blob/master/docs/PROJECT_SUMMARY.md)
-    - [Documentation](https://github.com/mohin-io/deep-rl-portfolio-allocation/tree/master/docs)
-    """)
-
-st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #666;'>
-    <p>🤖 Built with Streamlit, PyTorch, and Plotly |
-    📄 <a href='https://github.com/mohin-io/deep-rl-portfolio-allocation/blob/master/LICENSE'>MIT License</a> |
-    💻 <a href='https://github.com/mohin-io'>@mohin-io</a></p>
+    🤖 Powered by Multi-Agent Reinforcement Learning System<br>
+    Agents: Volatility Detection | Risk Management | Regime Detection | Adaptive Rebalancing | Forecasting
 </div>
 """, unsafe_allow_html=True)
