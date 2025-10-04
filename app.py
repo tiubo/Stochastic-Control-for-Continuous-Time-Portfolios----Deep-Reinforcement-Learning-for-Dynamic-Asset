@@ -362,81 +362,95 @@ with tab2:
     with col1:
         st.markdown("### 🎯 Risk-Return Profile")
 
-        fig = px.scatter(
-            baseline_results,
-            x='Volatility (%)',
-            y='Annual Return (%)',
-            size='Sharpe Ratio',
-            color='Sharpe Ratio',
-            text='Strategy',
-            color_continuous_scale='RdYlGn',
-            title="Risk vs Return (Bubble Size = Sharpe Ratio)"
-        )
+        # Check required columns exist
+        if all(col in baseline_results.columns for col in ['Volatility (%)', 'Annual Return (%)', 'Sharpe Ratio', 'Strategy']):
+            fig = px.scatter(
+                baseline_results,
+                x='Volatility (%)',
+                y='Annual Return (%)',
+                size='Sharpe Ratio',
+                color='Sharpe Ratio',
+                text='Strategy',
+                color_continuous_scale='RdYlGn',
+                title="Risk vs Return (Bubble Size = Sharpe Ratio)"
+            )
 
-        fig.update_traces(textposition='top center')
-        fig.update_layout(height=500)
+            fig.update_traces(textposition='top center')
+            fig.update_layout(height=500)
 
-        st.plotly_chart(fig, width='stretch')
+            st.plotly_chart(fig, width='stretch')
+        else:
+            st.warning("Risk-Return data not available. Run baseline strategies first.")
 
     with col2:
         st.markdown("### 📉 Maximum Drawdown Comparison")
 
-        fig = px.bar(
-            baseline_results.sort_values('Max Drawdown (%)'),
-            x='Strategy',
-            y='Max Drawdown (%)',
-            color='Max Drawdown (%)',
-            color_continuous_scale='RdYlGn_r',
-            title="Worst Peak-to-Trough Decline"
-        )
+        # Check required columns exist
+        if all(col in baseline_results.columns for col in ['Strategy', 'Max Drawdown (%)']):
+            fig = px.bar(
+                baseline_results.sort_values('Max Drawdown (%)'),
+                x='Strategy',
+                y='Max Drawdown (%)',
+                color='Max Drawdown (%)',
+                color_continuous_scale='RdYlGn_r',
+                title="Worst Peak-to-Trough Decline"
+            )
 
-        fig.update_layout(height=500, showlegend=False)
-        st.plotly_chart(fig, width='stretch')
+            fig.update_layout(height=500, showlegend=False)
+            st.plotly_chart(fig, width='stretch')
+        else:
+            st.warning("Drawdown data not available. Run baseline strategies first.")
 
     # Radar chart
     st.markdown("### 🕸️ Multi-Metric Performance Radar")
 
-    # Normalize metrics for radar chart
-    metrics = ['Sharpe Ratio', 'Sortino Ratio', 'Total Return (%)']
-    categories = metrics + ['Risk Control']
+    # Check required columns for radar chart
+    required_radar_cols = ['Sharpe Ratio', 'Sortino Ratio', 'Total Return (%)', 'Max Drawdown (%)', 'Strategy']
+    if all(col in baseline_results.columns for col in required_radar_cols):
+        # Normalize metrics for radar chart
+        metrics = ['Sharpe Ratio', 'Sortino Ratio', 'Total Return (%)']
+        categories = metrics + ['Risk Control']
 
-    # Add inverted drawdown as "Risk Control"
-    baseline_results['Risk Control'] = 100 - baseline_results['Max Drawdown (%)']
+        # Add inverted drawdown as "Risk Control"
+        baseline_results_copy = baseline_results.copy()
+        baseline_results_copy['Risk Control'] = 100 - baseline_results_copy['Max Drawdown (%)']
 
-    fig = go.Figure()
+        fig = go.Figure()
 
-    for i, row in baseline_results.iterrows():
-        values = []
-        for metric in metrics:
-            val = row[metric]
-            min_val = baseline_results[metric].min()
-            max_val = baseline_results[metric].max()
-            normalized = (val - min_val) / (max_val - min_val) if max_val > min_val else 0.5
-            values.append(normalized)
+        for i, row in baseline_results_copy.iterrows():
+            values = []
+            for metric in metrics:
+                val = row[metric]
+                min_val = baseline_results_copy[metric].min()
+                max_val = baseline_results_copy[metric].max()
+                normalized = (val - min_val) / (max_val - min_val) if max_val > min_val else 0.5
+                values.append(normalized)
 
-        # Add risk control
-        rc_val = row['Risk Control']
-        rc_min = baseline_results['Risk Control'].min()
-        rc_max = baseline_results['Risk Control'].max()
-        values.append((rc_val - rc_min) / (rc_max - rc_min) if rc_max > rc_min else 0.5)
+            # Add risk control
+            rc_val = row['Risk Control']
+            rc_min = baseline_results_copy['Risk Control'].min()
+            rc_max = baseline_results_copy['Risk Control'].max()
+            values.append((rc_val - rc_min) / (rc_max - rc_min) if rc_max > rc_min else 0.5)
 
-        values.append(values[0])  # Close the polygon
+            values.append(values[0])  # Close the polygon
 
-        fig.add_trace(go.Scatterpolar(
-            r=values,
-            theta=categories + [categories[0]],
-            fill='toself',
-            name=row['Strategy']
-        ))
+            fig.add_trace(go.Scatterpolar(
+                r=values,
+                theta=categories + [categories[0]],
+                fill='toself',
+                name=row['Strategy']
+            ))
 
-    fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-        showlegend=True,
-        height=600,
-        title="Normalized Performance Metrics"
-    )
+        fig.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+            showlegend=True,
+            height=600,
+            title="Normalized Performance Metrics"
+        )
 
-    st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig, width='stretch')
+    else:
+        st.warning("Performance metrics not available. Run baseline strategies first.")
 
 # Tab 3: Asset Allocation
 with tab3:
