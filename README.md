@@ -11,6 +11,27 @@
 
 > **Modern Evolution of Merton's Portfolio Theory**: Combining Deep Reinforcement Learning with Market Regime Detection for Adaptive Asset Allocation
 
+## 🎮 **Live Interactive Demo**
+
+<div align="center">
+
+### 📊 **[Launch Interactive Dashboard](https://deep-rl-portfolio.streamlit.app)** 📊
+
+*Experience real-time portfolio allocation with Deep RL agents*
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://deep-rl-portfolio.streamlit.app)
+
+**Features:**
+- 📈 Live Portfolio Performance Visualization
+- 🎯 Strategy Comparison (5 Baselines + 3 RL Agents)
+- 📊 Dynamic Asset Allocation Charts
+- 📉 Real-Time Risk Analysis & Drawdowns
+- 🤖 RL Training Progress Dashboard
+
+![Dashboard Preview](docs/images/dashboard_preview.png)
+
+</div>
+
 ---
 
 ## 🎯 Project Overview
@@ -102,7 +123,26 @@ cd deep-rl-portfolio-allocation
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Install dashboard dependencies
+pip install -r requirements-app.txt
 ```
+
+### 🎮 Run Interactive Dashboard Locally
+
+```bash
+# Launch the Streamlit dashboard
+streamlit run app.py
+
+# Dashboard will open at http://localhost:8501
+```
+
+**Dashboard Features:**
+- 📊 Real-time portfolio visualization with 10 years of data
+- 📈 Strategy comparison (5 baselines + 3 RL agents)
+- 🎯 Interactive asset allocation charts
+- 📉 Risk analysis with VaR and drawdown metrics
+- 🤖 RL training progress monitoring
 
 ### Quick Demo (Complete Pipeline)
 
