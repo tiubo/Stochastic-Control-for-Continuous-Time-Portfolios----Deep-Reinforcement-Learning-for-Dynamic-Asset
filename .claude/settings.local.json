@@ -16,7 +16,8 @@
       "Bash(python:*)",
       "Bash(pip install:*)",
       "Bash(dir:*)",
-      "Bash(git rev-list:*)"
+      "Bash(git rev-list:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
