@@ -70,9 +70,9 @@ st.markdown('<div class="sub-header">Stochastic Control for Continuous-Time Port
 
 # Sidebar
 with st.sidebar:
-    st.image("https://img.shields.io/badge/Python-3.9+-blue", use_container_width=False)
-    st.image("https://img.shields.io/badge/PyTorch-2.0+-red", use_container_width=False)
-    st.image("https://img.shields.io/badge/License-MIT-green", use_container_width=False)
+    st.image("https://img.shields.io/badge/Python-3.9+-blue", width='content')
+    st.image("https://img.shields.io/badge/PyTorch-2.0+-red", width='content')
+    st.image("https://img.shields.io/badge/License-MIT-green", width='content')
 
     st.markdown("---")
     st.markdown("### 🎯 Project Overview")
@@ -264,7 +264,7 @@ with tab1:
         template='plotly_white'
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     # Asset performance
     col1, col2 = st.columns(2)
@@ -291,7 +291,7 @@ with tab1:
         )
 
         fig.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col2:
         st.markdown("### 🎯 Current Allocation")
@@ -312,7 +312,7 @@ with tab1:
             height=400
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
 # Tab 2: Strategy Comparison
 with tab2:
@@ -321,23 +321,38 @@ with tab2:
     # Performance table
     st.markdown("### 📊 Performance Metrics")
 
-    # Style the dataframe
-    styled_df = baseline_results.style.background_gradient(
-        subset=['Sharpe Ratio', 'Sortino Ratio'],
-        cmap='RdYlGn'
-    ).background_gradient(
-        subset=['Max Drawdown (%)'],
-        cmap='RdYlGn_r'
-    ).format({
-        'Total Return (%)': '{:.2f}',
-        'Annual Return (%)': '{:.2f}',
-        'Volatility (%)': '{:.2f}',
-        'Sharpe Ratio': '{:.3f}',
-        'Sortino Ratio': '{:.3f}',
-        'Max Drawdown (%)': '{:.2f}'
-    })
+    # Style the dataframe with safe column checking
+    styler = baseline_results.style
 
-    st.dataframe(styled_df, use_container_width=True, height=250)
+    # Apply gradients only if columns exist
+    if 'Sharpe Ratio' in baseline_results.columns and 'Sortino Ratio' in baseline_results.columns:
+        styler = styler.background_gradient(
+            subset=['Sharpe Ratio', 'Sortino Ratio'],
+            cmap='RdYlGn'
+        )
+
+    if 'Max Drawdown (%)' in baseline_results.columns:
+        styler = styler.background_gradient(
+            subset=['Max Drawdown (%)'],
+            cmap='RdYlGn_r'
+        )
+
+    # Format columns that exist
+    format_dict = {}
+    for col, fmt in [
+        ('Total Return (%)', '{:.2f}'),
+        ('Annual Return (%)', '{:.2f}'),
+        ('Volatility (%)', '{:.2f}'),
+        ('Sharpe Ratio', '{:.3f}'),
+        ('Sortino Ratio', '{:.3f}'),
+        ('Max Drawdown (%)', '{:.2f}')
+    ]:
+        if col in baseline_results.columns:
+            format_dict[col] = fmt
+
+    styled_df = styler.format(format_dict)
+
+    st.dataframe(styled_df, width='stretch', height=250)
 
     st.markdown("---")
 
@@ -361,7 +376,7 @@ with tab2:
         fig.update_traces(textposition='top center')
         fig.update_layout(height=500)
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col2:
         st.markdown("### 📉 Maximum Drawdown Comparison")
@@ -376,7 +391,7 @@ with tab2:
         )
 
         fig.update_layout(height=500, showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     # Radar chart
     st.markdown("### 🕸️ Multi-Metric Performance Radar")
@@ -421,7 +436,7 @@ with tab2:
         title="Normalized Performance Metrics"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 # Tab 3: Asset Allocation
 with tab3:
@@ -505,7 +520,7 @@ with tab3:
         template='plotly_white'
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     # Turnover analysis
     st.markdown("### 🔄 Portfolio Turnover")
@@ -546,7 +561,7 @@ with tab3:
             height=400
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     with col2:
         st.markdown("#### 📊 Turnover Statistics")
@@ -622,7 +637,7 @@ with tab4:
         annotation_text="COVID-19 Crash", annotation_position="top left"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     # Risk metrics
     col1, col2, col3 = st.columns(3)
@@ -690,7 +705,7 @@ with tab4:
             height=300
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
 # Tab 5: RL Training
 with tab5:
@@ -831,7 +846,7 @@ with tab5:
         'Training Time': ['3 hours', '4-6 hours', '3-5 hours', 'N/A']
     })
 
-    st.dataframe(expected_results, use_container_width=True)
+    st.dataframe(expected_results, width='stretch')
 
     st.success("""
     **Hypothesis:**
