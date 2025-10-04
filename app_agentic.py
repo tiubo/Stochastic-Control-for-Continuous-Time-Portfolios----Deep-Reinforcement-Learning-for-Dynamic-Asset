@@ -565,8 +565,7 @@ with tab4:
                 y=allocation_df[col] * 100,
                 mode='lines',
                 name=col,
-                stackgroup='one',
-                fillcolor='tozeroy'
+                stackgroup='one'
             ))
 
         fig.update_layout(
