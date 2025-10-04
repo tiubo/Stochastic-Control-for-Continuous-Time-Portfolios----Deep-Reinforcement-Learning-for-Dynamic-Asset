@@ -1,43 +1,21 @@
 version: '3.8'
 
 services:
-  # FastAPI Service
   api:
     build: .
-    container_name: rl-portfolio-api
     ports:
       - "8000:8000"
     volumes:
-      - ./models:/app/models
-      - ./data:/app/data
+      - ./models:/app/models:ro
+      - ./data:/app/data:ro
       - ./logs:/app/logs
     environment:
-      - PYTHONUNBUFFERED=1
-    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --reload
+      - MODEL_PATH=/app/models/dqn_trained_ep1000.pth
+      - DATA_PATH=/app/data/processed/dataset_with_regimes.csv
+      - LOG_LEVEL=INFO
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-
-  # Streamlit Dashboard Service
-  dashboard:
-    build: .
-    container_name: rl-portfolio-dashboard
-    ports:
-      - "8501:8501"
-    volumes:
-      - ./models:/app/models
-      - ./data:/app/data
-      - ./docs/figures:/app/docs/figures
-    environment:
-      - PYTHONUNBUFFERED=1
-    command: streamlit run app/dashboard.py --server.port=8501 --server.address=0.0.0.0
-    restart: unless-stopped
-    depends_on:
-      - api
-
-networks:
-  default:
-    name: rl-portfolio-network

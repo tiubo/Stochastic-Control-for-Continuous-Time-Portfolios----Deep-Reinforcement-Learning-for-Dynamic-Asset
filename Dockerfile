@@ -1,40 +1,31 @@
-# Deep RL Portfolio Allocation - Docker Container
 FROM python:3.10-slim
 
-# Set working directory
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Install additional API dependencies
+RUN pip install fastapi uvicorn[standard] python-multipart
 
 # Copy application code
 COPY . .
 
 # Create necessary directories
-RUN mkdir -p models data/processed logs
+RUN mkdir -p logs models data/processed
 
-# Expose ports
-EXPOSE 8000 8501
-
-# Environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
+# Expose API port
+EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
-# Default command (FastAPI)
-CMD ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
-
-# Alternative: Run Streamlit dashboard
-# CMD ["streamlit", "run", "app/dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Run FastAPI server
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
